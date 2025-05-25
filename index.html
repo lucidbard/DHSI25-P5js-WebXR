@@ -3,14 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluesky VR Network Visualization</title>
+    <title>Bluesky XR Network Visualization</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            background: #000;
         }
         #controls {
             position: absolute;
@@ -21,35 +24,69 @@
             padding: 15px;
             border-radius: 5px;
             z-index: 100;
+            max-width: 300px;
         }
         input {
-            margin: 5px;
+            margin: 5px 0;
             padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
         }
         button {
-            margin: 5px;
+            margin: 5px 0;
             padding: 8px 15px;
             background: #0085ff;
             color: white;
             border: none;
             border-radius: 3px;
             cursor: pointer;
+            width: 100%;
+            font-size: 14px;
         }
         button:hover {
             background: #0066cc;
         }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
         #status {
             margin-top: 10px;
             font-size: 12px;
+            color: #ddd;
+        }
+        .xr-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .xr-buttons button {
+            flex: 1;
+        }
+        #arButton { background: #00a070; }
+        #arButton:hover { background: #008050; }
+        #vrButton { background: #0085ff; }
+        #vrButton:hover { background: #0066cc; }
+        
+        @media (max-width: 600px) {
+            #controls {
+                width: calc(100% - 20px);
+                max-width: none;
+            }
         }
     </style>
 </head>
 <body>
     <div id="controls">
-        <h3>Bluesky VR Network</h3>
+        <h3>Bluesky XR Network</h3>
         <input type="text" id="hashtag" placeholder="Enter hashtag (without #)" value="p5js">
-        <button onclick="updateHashtag()">Update</button>
-        <button onclick="enterVR()">Enter VR</button>
+        <button onclick="updateHashtag()">Update Hashtag</button>
+        
+        <div class="xr-buttons">
+            <button id="arButton" onclick="enterAR()">Enter AR</button>
+            <button id="vrButton" onclick="enterVR()">Enter VR/MR</button>
+        </div>
+        
         <div id="status">Ready to fetch posts...</div>
     </div>
 
@@ -58,10 +95,27 @@
         let edges = [];
         let hashtag = 'p5js';
         let lastUpdate = 0;
-        let updateInterval = 30000; // Update every 30 seconds
-        let vrButton;
+        let updateInterval = 30000;
         let xrSession = null;
-        let gl, xrRefSpace;
+        let xrMode = null; // 'ar' or 'vr'
+        let gl, canvas;
+        let xrRefSpace;
+        let hitTestSource = null;
+        let localFloor = null;
+        let viewerSpace = null;
+        let myFont = null;
+        
+        // Touch/gesture tracking
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let networkScale = 1;
+        let networkRotation = 0;
+        let networkPosition = { x: 0, y: 0, z: -300 };
+        
+        // Add your Bluesky credentials here
+        const BLUESKY_HANDLE = 'your-handle.bsky.social';
+        const BLUESKY_APP_PASSWORD = 'your-app-password';
+        let authToken = null;
         
         // Node class for posts
         class Node {
@@ -69,18 +123,18 @@
                 this.id = id;
                 this.text = text;
                 this.author = author;
-                this.x = random(-200, 200);
-                this.y = random(-200, 200);
-                this.z = random(-200, 200);
+                this.x = random(-150, 150);
+                this.y = random(-150, 150);
+                this.z = random(-150, 150);
                 this.vx = 0;
                 this.vy = 0;
                 this.vz = 0;
                 this.terms = this.extractTerms(text);
                 this.color = color(random(100, 255), random(100, 255), random(100, 255));
+                this.size = 8;
             }
             
             extractTerms(text) {
-                // Extract meaningful terms (words > 4 chars, excluding common words)
                 const commonWords = ['this', 'that', 'with', 'from', 'have', 'been', 'were', 'there', 'their', 'would', 'could', 'should'];
                 return text.toLowerCase()
                     .split(/\s+/)
@@ -89,18 +143,15 @@
             }
             
             update() {
-                // Simple physics simulation
                 this.x += this.vx;
                 this.y += this.vy;
                 this.z += this.vz;
                 
-                // Damping
                 this.vx *= 0.95;
                 this.vy *= 0.95;
                 this.vz *= 0.95;
                 
-                // Boundary constraints
-                let boundary = 300;
+                let boundary = 200;
                 if (abs(this.x) > boundary) this.vx *= -0.5;
                 if (abs(this.y) > boundary) this.vy *= -0.5;
                 if (abs(this.z) > boundary) this.vz *= -0.5;
@@ -115,24 +166,34 @@
             display() {
                 push();
                 translate(this.x, this.y, this.z);
+                
+                // Adjust size based on XR mode
+                let nodeSize = xrSession ? this.size * 0.8 : this.size;
+                
                 fill(this.color);
                 noStroke();
-                sphere(10);
+                sphere(nodeSize);
                 
-                // Display author name
+                // Display text
                 push();
-                rotateY(frameCount * 0.01);
-                textAlign(CENTER);
-                textSize(8);
+                if (xrSession) {
+                    // In XR, make text face the camera
+                    rotateY(frameCount * 0.01);
+                } else {
+                    rotateY(frameCount * 0.01);
+                }
+                textAlign(CENTER, CENTER);
+                textSize(xrSession ? 6 : 8);
                 fill(255);
-                text(this.author, 0, -15);
+                noStroke();
+                text(this.author, 0, -nodeSize - 5);
                 pop();
                 
                 pop();
             }
         }
         
-        // Edge class for connections
+        // Edge class
         class Edge {
             constructor(node1, node2, strength) {
                 this.node1 = node1;
@@ -147,11 +208,6 @@
                      this.node2.x, this.node2.y, this.node2.z);
             }
         }
-        
-        // Add your Bluesky credentials here
-        const BLUESKY_HANDLE = 'your-handle.bsky.social'; // Replace with your handle
-        const BLUESKY_APP_PASSWORD = 'your-app-password'; // Replace with your app password
-        let authToken = null;
         
         async function authenticate() {
             try {
@@ -179,22 +235,18 @@
             const status = document.getElementById('status');
             status.textContent = 'Fetching posts...';
             
-            // Authenticate if needed
             if (!authToken && BLUESKY_HANDLE !== 'your-handle.bsky.social') {
                 await authenticate();
             }
             
             try {
-                // Using the public Bluesky API (no auth needed for search)
                 const response = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23${hashtag}&limit=30`);
                 const data = await response.json();
                 
                 if (data.posts && data.posts.length > 0) {
-                    // Clear existing nodes and edges
                     nodes = [];
                     edges = [];
                     
-                    // Create nodes from posts
                     data.posts.forEach(post => {
                         const node = new Node(
                             post.uri,
@@ -204,7 +256,6 @@
                         nodes.push(node);
                     });
                     
-                    // Create edges based on shared terms
                     for (let i = 0; i < nodes.length; i++) {
                         for (let j = i + 1; j < nodes.length; j++) {
                             const sharedTerms = nodes[i].terms.filter(term => 
@@ -219,9 +270,7 @@
                         }
                     }
                     
-                    // Apply initial forces for layout
                     applyForces();
-                    
                     status.textContent = `Loaded ${nodes.length} posts with ${edges.length} connections`;
                 } else {
                     status.textContent = 'No posts found for this hashtag';
@@ -234,7 +283,6 @@
         }
         
         function createDemoData() {
-            // Create demo nodes if API fails
             nodes = [];
             edges = [];
             
@@ -253,7 +301,6 @@
                 nodes.push(new Node(i, text, `user${i}`));
             });
             
-            // Create some connections
             for (let i = 0; i < nodes.length; i++) {
                 for (let j = i + 1; j < nodes.length; j++) {
                     if (random() < 0.3) {
@@ -264,7 +311,6 @@
         }
         
         function applyForces() {
-            // Apply spring forces between connected nodes
             edges.forEach(edge => {
                 let dx = edge.node2.x - edge.node1.x;
                 let dy = edge.node2.y - edge.node1.y;
@@ -272,7 +318,7 @@
                 let distance = sqrt(dx*dx + dy*dy + dz*dz);
                 
                 if (distance > 0) {
-                    let force = (distance - 100) * 0.001 * edge.strength;
+                    let force = (distance - 80) * 0.001 * edge.strength;
                     dx /= distance;
                     dy /= distance;
                     dz /= distance;
@@ -282,7 +328,6 @@
                 }
             });
             
-            // Apply repulsion forces between all nodes
             for (let i = 0; i < nodes.length; i++) {
                 for (let j = i + 1; j < nodes.length; j++) {
                     let dx = nodes[j].x - nodes[i].x;
@@ -290,8 +335,8 @@
                     let dz = nodes[j].z - nodes[i].z;
                     let distance = sqrt(dx*dx + dy*dy + dz*dz);
                     
-                    if (distance > 0 && distance < 200) {
-                        let force = 100 / (distance * distance);
+                    if (distance > 0 && distance < 150) {
+                        let force = 50 / (distance * distance);
                         dx /= distance;
                         dy /= distance;
                         dz /= distance;
@@ -308,6 +353,47 @@
             fetchBlueskyPosts();
         }
         
+        async function checkXRSupport() {
+            if (!navigator.xr) {
+                document.getElementById('arButton').disabled = true;
+                document.getElementById('vrButton').disabled = true;
+                document.getElementById('status').textContent = 'WebXR not supported';
+                return;
+            }
+            
+            const arSupported = await navigator.xr.isSessionSupported('immersive-ar');
+            const vrSupported = await navigator.xr.isSessionSupported('immersive-vr');
+            
+            document.getElementById('arButton').disabled = !arSupported;
+            document.getElementById('vrButton').disabled = !vrSupported;
+            
+            if (!arSupported && !vrSupported) {
+                document.getElementById('status').textContent = 'No XR modes supported';
+            }
+        }
+        
+        async function enterAR() {
+            if (!navigator.xr) {
+                alert('WebXR not supported in this browser');
+                return;
+            }
+            
+            try {
+                xrMode = 'ar';
+                xrSession = await navigator.xr.requestSession('immersive-ar', {
+                    requiredFeatures: ['hit-test', 'local-floor'],
+                    optionalFeatures: ['hand-tracking', 'layers']
+                });
+                
+                await setupXRSession();
+                document.getElementById('status').textContent = 'AR mode active - tap to place network';
+                
+            } catch (error) {
+                console.error('Error entering AR:', error);
+                alert('Failed to enter AR mode');
+            }
+        }
+        
         async function enterVR() {
             if (!navigator.xr) {
                 alert('WebXR not supported in this browser');
@@ -315,33 +401,49 @@
             }
             
             try {
-                const supported = await navigator.xr.isSessionSupported('immersive-vr');
-                if (!supported) {
-                    alert('VR not supported on this device');
-                    return;
-                }
-                
-                xrSession = await navigator.xr.requestSession('immersive-vr');
-                
-                // Set up WebXR rendering
-                gl = createCanvas(windowWidth, windowHeight, WEBGL).GL;
-                await xrSession.updateRenderState({ baseLayer: new XRWebGLLayer(xrSession, gl) });
-                
-                xrRefSpace = await xrSession.requestReferenceSpace('local');
-                
-                xrSession.requestAnimationFrame(onXRFrame);
-                
-                document.getElementById('status').textContent = 'VR mode active';
-                
-                xrSession.addEventListener('end', () => {
-                    xrSession = null;
-                    document.getElementById('status').textContent = 'VR mode ended';
+                xrMode = 'vr';
+                xrSession = await navigator.xr.requestSession('immersive-vr', {
+                    optionalFeatures: ['local-floor', 'hand-tracking', 'layers']
                 });
+                
+                await setupXRSession();
+                document.getElementById('status').textContent = 'VR/MR mode active';
                 
             } catch (error) {
                 console.error('Error entering VR:', error);
                 alert('Failed to enter VR mode');
             }
+        }
+        
+        async function setupXRSession() {
+            canvas = document.querySelector('canvas');
+            gl = canvas.getContext('webgl', { xrCompatible: true });
+            
+            await xrSession.updateRenderState({ 
+                baseLayer: new XRWebGLLayer(xrSession, gl) 
+            });
+            
+            // Get reference spaces
+            xrRefSpace = await xrSession.requestReferenceSpace('local');
+            
+            if (xrMode === 'ar') {
+                viewerSpace = await xrSession.requestReferenceSpace('viewer');
+                xrSession.requestHitTestSource({ space: viewerSpace }).then((source) => {
+                    hitTestSource = source;
+                });
+            }
+            
+            xrSession.requestAnimationFrame(onXRFrame);
+            
+            xrSession.addEventListener('end', () => {
+                xrSession = null;
+                xrMode = null;
+                hitTestSource = null;
+                document.getElementById('status').textContent = 'XR mode ended';
+            });
+            
+            // Hide controls in XR
+            document.getElementById('controls').style.display = 'none';
         }
         
         function onXRFrame(time, frame) {
@@ -350,27 +452,78 @@
             xrSession.requestAnimationFrame(onXRFrame);
             
             const pose = frame.getViewerPose(xrRefSpace);
-            if (pose) {
-                // Render for each eye
-                const glLayer = xrSession.renderState.baseLayer;
-                gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
-                
-                for (const view of pose.views) {
-                    const viewport = glLayer.getViewport(view);
-                    gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-                    
-                    // Apply view matrix
-                    resetMatrix();
-                    applyMatrix(...view.transform.inverse.matrix);
-                    
-                    // Render scene
-                    drawScene();
+            if (!pose) return;
+            
+            const glLayer = xrSession.renderState.baseLayer;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+            
+            // Handle AR hit testing
+            if (xrMode === 'ar' && hitTestSource) {
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const hitPose = hit.getPose(xrRefSpace);
+                    if (hitPose) {
+                        // Update network position based on hit test
+                        networkPosition.x = hitPose.transform.position.x * 100;
+                        networkPosition.y = hitPose.transform.position.y * 100;
+                        networkPosition.z = hitPose.transform.position.z * 100;
+                    }
                 }
+            }
+            
+            // Render for each eye
+            for (const view of pose.views) {
+                const viewport = glLayer.getViewport(view);
+                gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                
+                // Clear and setup view
+                background(10, 10, 30);
+                resetMatrix();
+                
+                // Apply view matrix
+                const viewMatrix = view.transform.inverse.matrix;
+                applyMatrix(...viewMatrix);
+                
+                // Apply projection matrix
+                const projMatrix = view.projectionMatrix;
+                perspective(
+                    2 * Math.atan(1 / projMatrix[5]),
+                    viewport.width / viewport.height,
+                    0.1,
+                    1000
+                );
+                
+                // Render scene at network position
+                push();
+                translate(networkPosition.x, networkPosition.y, networkPosition.z);
+                scale(networkScale);
+                rotateY(networkRotation);
+                
+                drawXRScene();
+                
+                pop();
             }
         }
         
+        function preload() {
+            // Load a web-safe font from Google Fonts
+            myFont = loadFont('https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf');
+        }
+        
         function setup() {
-            createCanvas(windowWidth, windowHeight, WEBGL);
+            canvas = createCanvas(windowWidth, windowHeight, WEBGL);
+            gl = canvas.GL;
+            
+            // Set the font
+            textFont(myFont);
+            
+            // Check XR support
+            checkXRSupport();
+            
+            // Touch event handlers for mobile
+            canvas.touchStarted = handleTouchStart;
+            canvas.touchMoved = handleTouchMove;
             
             // Initial data fetch
             fetchBlueskyPosts();
@@ -379,10 +532,21 @@
         function draw() {
             if (!xrSession) {
                 // Regular non-VR rendering
+                background(10, 10, 30);
+                lights();
+                
+                // Camera controls
+                orbitControl();
+                
+                // Apply transformations
+                translate(networkPosition.x, networkPosition.y, networkPosition.z);
+                scale(networkScale);
+                rotateY(networkRotation);
+                
                 drawScene();
             }
             
-            // Auto-update data periodically
+            // Auto-update data
             if (millis() - lastUpdate > updateInterval) {
                 fetchBlueskyPosts();
                 lastUpdate = millis();
@@ -390,14 +554,6 @@
         }
         
         function drawScene() {
-            background(10, 10, 30);
-            lights();
-            
-            // Camera controls for non-VR mode
-            if (!xrSession) {
-                orbitControl();
-            }
-            
             // Update physics
             applyForces();
             nodes.forEach(node => node.update());
@@ -408,14 +564,87 @@
             // Draw nodes
             nodes.forEach(node => node.display());
             
-            // Draw hashtag info
+            // Draw hashtag
             push();
-            translate(0, -250, 0);
-            textAlign(CENTER);
+            translate(0, -200, 0);
+            textAlign(CENTER, CENTER);
             textSize(20);
             fill(255);
+            noStroke();
             text(`#${hashtag}`, 0, 0);
             pop();
+        }
+        
+        function drawXRScene() {
+            // Simpler lighting for XR
+            ambientLight(50);
+            directionalLight(255, 255, 255, 0, -1, -1);
+            
+            // Update physics
+            applyForces();
+            nodes.forEach(node => node.update());
+            
+            // Draw edges with XR-friendly settings
+            push();
+            strokeWeight(1.5);
+            edges.forEach(edge => edge.display());
+            pop();
+            
+            // Draw nodes
+            nodes.forEach(node => node.display());
+            
+            // Draw hashtag
+            push();
+            translate(0, -150, 0);
+            textAlign(CENTER);
+            textSize(15);
+            fill(255, 255, 255);
+            text(`#${hashtag}`, 0, 0);
+            pop();
+            
+            // AR placement indicator
+            if (xrMode === 'ar' && hitTestSource) {
+                push();
+                translate(0, -100, 0);
+                noFill();
+                stroke(255, 255, 0);
+                strokeWeight(2);
+                rotateX(HALF_PI);
+                circle(0, 0, 50);
+                pop();
+            }
+        }
+        
+        function handleTouchStart(event) {
+            if (event.touches.length === 1) {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            }
+        }
+        
+        function handleTouchMove(event) {
+            if (event.touches.length === 1) {
+                const deltaX = event.touches[0].clientX - touchStartX;
+                const deltaY = event.touches[0].clientY - touchStartY;
+                
+                networkRotation += deltaX * 0.01;
+                
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            } else if (event.touches.length === 2) {
+                // Pinch to zoom
+                const dist = sqrt(
+                    pow(event.touches[0].clientX - event.touches[1].clientX, 2) +
+                    pow(event.touches[0].clientY - event.touches[1].clientY, 2)
+                );
+                
+                if (window.lastPinchDist) {
+                    const scale = dist / window.lastPinchDist;
+                    networkScale *= scale;
+                    networkScale = constrain(networkScale, 0.1, 3);
+                }
+                window.lastPinchDist = dist;
+            }
         }
         
         function windowResized() {
