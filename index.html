@@ -374,15 +374,24 @@
         
         async function enterAR() {
             if (!navigator.xr) {
-                alert('WebXR not supported in this browser');
+                alert('WebXR not supported in this browser. Please use Chrome or Edge on Android.');
                 return;
             }
             
             try {
+                // Check if AR is supported
+                const supported = await navigator.xr.isSessionSupported('immersive-ar');
+                if (!supported) {
+                    alert('AR not supported on this device. AR requires:\n- Chrome/Edge on Android\n- ARCore-compatible device\n- Camera permissions');
+                    return;
+                }
+                
                 xrMode = 'ar';
+                
+                // Request AR session with proper features
                 xrSession = await navigator.xr.requestSession('immersive-ar', {
-                    requiredFeatures: ['hit-test', 'local-floor'],
-                    optionalFeatures: ['hand-tracking', 'layers']
+                    requiredFeatures: ['hit-test'],
+                    optionalFeatures: ['local-floor', 'dom-overlay', 'anchors', 'light-estimation']
                 });
                 
                 await setupXRSession();
@@ -390,7 +399,17 @@
                 
             } catch (error) {
                 console.error('Error entering AR:', error);
-                alert('Failed to enter AR mode');
+                
+                // Provide specific error messages
+                if (error.name === 'NotAllowedError') {
+                    alert('Camera permission denied. Please allow camera access and try again.');
+                } else if (error.name === 'NotSupportedError') {
+                    alert('AR not supported. Make sure you\'re using:\n- Chrome 81+ or Edge on Android\n- A device with ARCore support');
+                } else if (error.name === 'InvalidStateError') {
+                    alert('Another XR session is already active. Please close other XR apps and try again.');
+                } else {
+                    alert(`Failed to enter AR mode: ${error.message}\n\nTry:\n- Using Chrome on Android\n- Enabling camera permissions\n- Checking ARCore is installed`);
+                }
             }
         }
         
