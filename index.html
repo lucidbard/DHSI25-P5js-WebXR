@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluesky VR Network Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        input {
+            margin: 5px;
+            padding: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            background: #0085ff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0066cc;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h3>Bluesky VR Network</h3>
+        <input type="text" id="hashtag" placeholder="Enter hashtag (without #)" value="p5js">
+        <button onclick="updateHashtag()">Update</button>
+        <button onclick="enterVR()">Enter VR</button>
+        <div id="status">Ready to fetch posts...</div>
+    </div>
+
+    <script>
+        let nodes = [];
+        let edges = [];
+        let hashtag = 'p5js';
+        let lastUpdate = 0;
+        let updateInterval = 30000; // Update every 30 seconds
+        let vrButton;
+        let xrSession = null;
+        let gl, xrRefSpace;
+        
+        // Node class for posts
+        class Node {
+            constructor(id, text, author) {
+                this.id = id;
+                this.text = text;
+                this.author = author;
+                this.x = random(-200, 200);
+                this.y = random(-200, 200);
+                this.z = random(-200, 200);
+                this.vx = 0;
+                this.vy = 0;
+                this.vz = 0;
+                this.terms = this.extractTerms(text);
+                this.color = color(random(100, 255), random(100, 255), random(100, 255));
+            }
+            
+            extractTerms(text) {
+                // Extract meaningful terms (words > 4 chars, excluding common words)
+                const commonWords = ['this', 'that', 'with', 'from', 'have', 'been', 'were', 'there', 'their', 'would', 'could', 'should'];
+                return text.toLowerCase()
+                    .split(/\s+/)
+                    .filter(word => word.length > 4 && !commonWords.includes(word))
+                    .map(word => word.replace(/[^a-z0-9]/g, ''));
+            }
+            
+            update() {
+                // Simple physics simulation
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+                
+                // Damping
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+                this.vz *= 0.95;
+                
+                // Boundary constraints
+                let boundary = 300;
+                if (abs(this.x) > boundary) this.vx *= -0.5;
+                if (abs(this.y) > boundary) this.vy *= -0.5;
+                if (abs(this.z) > boundary) this.vz *= -0.5;
+            }
+            
+            applyForce(fx, fy, fz) {
+                this.vx += fx;
+                this.vy += fy;
+                this.vz += fz;
+            }
+            
+            display() {
+                push();
+                translate(this.x, this.y, this.z);
+                fill(this.color);
+                noStroke();
+                sphere(10);
+                
+                // Display author name
+                push();
+                rotateY(frameCount * 0.01);
+                textAlign(CENTER);
+                textSize(8);
+                fill(255);
+                text(this.author, 0, -15);
+                pop();
+                
+                pop();
+            }
+        }
+        
+        // Edge class for connections
+        class Edge {
+            constructor(node1, node2, strength) {
+                this.node1 = node1;
+                this.node2 = node2;
+                this.strength = strength;
+            }
+            
+            display() {
+                stroke(255, 100);
+                strokeWeight(this.strength * 2);
+                line(this.node1.x, this.node1.y, this.node1.z,
+                     this.node2.x, this.node2.y, this.node2.z);
+            }
+        }
+        
+        // Add your Bluesky credentials here
+        const BLUESKY_HANDLE = 'your-handle.bsky.social'; // Replace with your handle
+        const BLUESKY_APP_PASSWORD = 'your-app-password'; // Replace with your app password
+        let authToken = null;
+        
+        async function authenticate() {
+            try {
+                const response = await fetch('https://bsky.social/xrpc/com.atproto.server.createSession', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        identifier: BLUESKY_HANDLE,
+                        password: BLUESKY_APP_PASSWORD
+                    })
+                });
+                
+                const session = await response.json();
+                authToken = session.accessJwt;
+                return true;
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                return false;
+            }
+        }
+        
+        async function fetchBlueskyPosts() {
+            const status = document.getElementById('status');
+            status.textContent = 'Fetching posts...';
+            
+            // Authenticate if needed
+            if (!authToken && BLUESKY_HANDLE !== 'your-handle.bsky.social') {
+                await authenticate();
+            }
+            
+            try {
+                // Using the public Bluesky API (no auth needed for search)
+                const response = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23${hashtag}&limit=30`);
+                const data = await response.json();
+                
+                if (data.posts && data.posts.length > 0) {
+                    // Clear existing nodes and edges
+                    nodes = [];
+                    edges = [];
+                    
+                    // Create nodes from posts
+                    data.posts.forEach(post => {
+                        const node = new Node(
+                            post.uri,
+                            post.record.text || '',
+                            post.author.handle || 'anonymous'
+                        );
+                        nodes.push(node);
+                    });
+                    
+                    // Create edges based on shared terms
+                    for (let i = 0; i < nodes.length; i++) {
+                        for (let j = i + 1; j < nodes.length; j++) {
+                            const sharedTerms = nodes[i].terms.filter(term => 
+                                nodes[j].terms.includes(term)
+                            );
+                            
+                            if (sharedTerms.length > 0) {
+                                const strength = sharedTerms.length / 
+                                    Math.max(nodes[i].terms.length, nodes[j].terms.length);
+                                edges.push(new Edge(nodes[i], nodes[j], strength));
+                            }
+                        }
+                    }
+                    
+                    // Apply initial forces for layout
+                    applyForces();
+                    
+                    status.textContent = `Loaded ${nodes.length} posts with ${edges.length} connections`;
+                } else {
+                    status.textContent = 'No posts found for this hashtag';
+                }
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                status.textContent = 'Error fetching posts. Using demo data.';
+                createDemoData();
+            }
+        }
+        
+        function createDemoData() {
+            // Create demo nodes if API fails
+            nodes = [];
+            edges = [];
+            
+            const demoTexts = [
+                'Learning p5js and creative coding today',
+                'New generative art project with p5js',
+                'Creative coding workshop this weekend',
+                'Exploring WebXR with p5js framework',
+                'Generative patterns and algorithmic art',
+                'Interactive visuals with creative coding',
+                'WebXR experiments in the browser',
+                'Teaching creative coding to beginners'
+            ];
+            
+            demoTexts.forEach((text, i) => {
+                nodes.push(new Node(i, text, `user${i}`));
+            });
+            
+            // Create some connections
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    if (random() < 0.3) {
+                        edges.push(new Edge(nodes[i], nodes[j], random(0.1, 0.5)));
+                    }
+                }
+            }
+        }
+        
+        function applyForces() {
+            // Apply spring forces between connected nodes
+            edges.forEach(edge => {
+                let dx = edge.node2.x - edge.node1.x;
+                let dy = edge.node2.y - edge.node1.y;
+                let dz = edge.node2.z - edge.node1.z;
+                let distance = sqrt(dx*dx + dy*dy + dz*dz);
+                
+                if (distance > 0) {
+                    let force = (distance - 100) * 0.001 * edge.strength;
+                    dx /= distance;
+                    dy /= distance;
+                    dz /= distance;
+                    
+                    edge.node1.applyForce(dx * force, dy * force, dz * force);
+                    edge.node2.applyForce(-dx * force, -dy * force, -dz * force);
+                }
+            });
+            
+            // Apply repulsion forces between all nodes
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    let dx = nodes[j].x - nodes[i].x;
+                    let dy = nodes[j].y - nodes[i].y;
+                    let dz = nodes[j].z - nodes[i].z;
+                    let distance = sqrt(dx*dx + dy*dy + dz*dz);
+                    
+                    if (distance > 0 && distance < 200) {
+                        let force = 100 / (distance * distance);
+                        dx /= distance;
+                        dy /= distance;
+                        dz /= distance;
+                        
+                        nodes[i].applyForce(-dx * force, -dy * force, -dz * force);
+                        nodes[j].applyForce(dx * force, dy * force, dz * force);
+                    }
+                }
+            }
+        }
+        
+        function updateHashtag() {
+            hashtag = document.getElementById('hashtag').value || 'p5js';
+            fetchBlueskyPosts();
+        }
+        
+        async function enterVR() {
+            if (!navigator.xr) {
+                alert('WebXR not supported in this browser');
+                return;
+            }
+            
+            try {
+                const supported = await navigator.xr.isSessionSupported('immersive-vr');
+                if (!supported) {
+                    alert('VR not supported on this device');
+                    return;
+                }
+                
+                xrSession = await navigator.xr.requestSession('immersive-vr');
+                
+                // Set up WebXR rendering
+                gl = createCanvas(windowWidth, windowHeight, WEBGL).GL;
+                await xrSession.updateRenderState({ baseLayer: new XRWebGLLayer(xrSession, gl) });
+                
+                xrRefSpace = await xrSession.requestReferenceSpace('local');
+                
+                xrSession.requestAnimationFrame(onXRFrame);
+                
+                document.getElementById('status').textContent = 'VR mode active';
+                
+                xrSession.addEventListener('end', () => {
+                    xrSession = null;
+                    document.getElementById('status').textContent = 'VR mode ended';
+                });
+                
+            } catch (error) {
+                console.error('Error entering VR:', error);
+                alert('Failed to enter VR mode');
+            }
+        }
+        
+        function onXRFrame(time, frame) {
+            if (!xrSession) return;
+            
+            xrSession.requestAnimationFrame(onXRFrame);
+            
+            const pose = frame.getViewerPose(xrRefSpace);
+            if (pose) {
+                // Render for each eye
+                const glLayer = xrSession.renderState.baseLayer;
+                gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+                
+                for (const view of pose.views) {
+                    const viewport = glLayer.getViewport(view);
+                    gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+                    
+                    // Apply view matrix
+                    resetMatrix();
+                    applyMatrix(...view.transform.inverse.matrix);
+                    
+                    // Render scene
+                    drawScene();
+                }
+            }
+        }
+        
+        function setup() {
+            createCanvas(windowWidth, windowHeight, WEBGL);
+            
+            // Initial data fetch
+            fetchBlueskyPosts();
+        }
+        
+        function draw() {
+            if (!xrSession) {
+                // Regular non-VR rendering
+                drawScene();
+            }
+            
+            // Auto-update data periodically
+            if (millis() - lastUpdate > updateInterval) {
+                fetchBlueskyPosts();
+                lastUpdate = millis();
+            }
+        }
+        
+        function drawScene() {
+            background(10, 10, 30);
+            lights();
+            
+            // Camera controls for non-VR mode
+            if (!xrSession) {
+                orbitControl();
+            }
+            
+            // Update physics
+            applyForces();
+            nodes.forEach(node => node.update());
+            
+            // Draw edges
+            edges.forEach(edge => edge.display());
+            
+            // Draw nodes
+            nodes.forEach(node => node.display());
+            
+            // Draw hashtag info
+            push();
+            translate(0, -250, 0);
+            textAlign(CENTER);
+            textSize(20);
+            fill(255);
+            text(`#${hashtag}`, 0, 0);
+            pop();
+        }
+        
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+    </script>
+</body>
+</html>
