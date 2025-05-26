@@ -114,25 +114,51 @@
       border-radius: 8px;
       margin: 15px 0;
       border-left: 4px solid #d4af37;
-    }
-
-    .code-editor {
+    }    .code-editor {
       width: 100%;
       height: 200px;
-      background: #1e1e1e;
-      color: #f8f8f2;
-      border: 1px solid #8b7355;
-      border-radius: 5px;
-      padding: 10px;
-      font-family: 'Courier New', monospace;
+      background: #ffffff;
+      color: #000000;
+      border: 2px solid #e1e4e8;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
       font-size: 14px;
       resize: vertical;
+      line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .jupyter-cell {
+      background: #ffffff;
+      border: 1px solid #cfcfcf;
+      border-radius: 8px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .cell-header {
+      background: #f7f7f7;
+      border-bottom: 1px solid #e1e4e8;
+      padding: 8px 15px;
+      font-size: 12px;
+      color: #586069;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cell-number {
+      font-weight: bold;
+      color: #0969da;
     }
 
     .button-group {
       margin: 15px 0;
       display: flex;
       gap: 10px;
+      justify-content: flex-start;
     }
 
     button {
@@ -254,19 +280,26 @@
         <div id="storyContent"></div>
         <div class="challenge-text" id="challengeText"></div>
         <div id="dataDisplay"></div>
-      </div>
-
-      <div class="code-panel">
+      </div>      <div class="code-panel">
         <h2>💻 Digital Analysis Tools</h2>
-        <textarea id="codeEditor" class="code-editor" placeholder="Write your Python code here..."></textarea>
-
-        <div class="button-group">
-          <button onclick="runCode()">🔍 Run Analysis</button>
-          <button onclick="getHint()">💡 Request Hint</button>
-          <button onclick="resetCode()">🔄 Reset Code</button>
+        
+        <div class="jupyter-cell">
+          <div class="cell-header">
+            <span class="cell-number">In [1]:</span>
+            <span>Python Code Cell</span>
+          </div>
+          <textarea id="codeEditor" class="code-editor" placeholder="# Write your Python code here...
+# Press Run to execute"></textarea>
         </div>
 
         <div id="output" class="output"></div>
+        
+        <div class="button-group">
+          <button onclick="runCode()">▶️ Run</button>
+          <button onclick="getHint()">💡 Hint</button>
+          <button onclick="resetCode()">🔄 Reset</button>
+        </div>
+
         <div id="hintArea"></div>
       </div>
     </div>
@@ -295,8 +328,7 @@
     function initializeStages() {
       stages = [
         {
-          title: "The Mysterious Manuscript",
-          story: `Dr. Elena Rodriguez has discovered fragments of an ancient manuscript in the digital archives of the Alexandria Library. The fragments contain references to a lost civilization, but they're scattered and encoded. 
+          title: "The Mysterious Manuscript",          story: `Dr. Elena Rodriguez has discovered fragments of an ancient manuscript in the digital archives of the Alexandria Library. The fragments contain references to a lost civilization, but they're scattered and encoded. 
 
 You've been called in as a digital archaeologist to help piece together this mystery using computational analysis.
 
@@ -307,23 +339,15 @@ In Python, we store information in <em>variables</em>. Think of variables as lab
 • Numbers don't need quotes: <code>count = 23</code>
 • Use <code>print()</code> to display information
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-location = "Library of Alexandria"
-year_discovered = 2024
-print("Discovery location:", location)
-print("Year:", year_discovered)
-</div>
-
-Run this code to see how variables work, then modify it to use the manuscript data below.`,
+Practice using variables and print statements with the manuscript data provided below.`,
           challenge: "Your task: Store the manuscript's catalog number and initial fragment count as variables, then display them using print statements.",
           data: `Manuscript ID: "MS-ALEX-2847"
-Fragment Count: 23`,
-          starterCode: `# Try the example first, then replace with manuscript data
-location = "Library of Alexandria"
-year_discovered = 2024
-print("Discovery location:", location)
-print("Year:", year_discovered)`,
+Fragment Count: 23`,          starterCode: `# Store the manuscript data as variables and display them
+# Manuscript ID: "MS-ALEX-2847"
+# Fragment Count: 23
+
+# Your code here:
+`,
           solution: `catalog_number = "MS-ALEX-2847"
 fragment_count = 23
 print("Manuscript Catalog:", catalog_number)
@@ -336,8 +360,7 @@ print("Fragments Found:", fragment_count)`,
           ]
         },
         {
-          title: "Analyzing Fragment Lengths",
-          story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
+          title: "Analyzing Fragment Lengths",          story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
 
 <strong>🔍 Python Concepts: Lists and For Loops</strong>
 
@@ -346,26 +369,14 @@ print("Fragments Found:", fragment_count)`,
 • <em>For loops</em> let you process each item: <code>for item in my_list:</code>
 • <code>len()</code> returns how many items are in a list
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-scores = [85, 92, 78, 96, 88]
-total = 0
-for score in scores:
-    total = total + score
-print("Total points:", total)
-print("Number of tests:", len(scores))
-</div>
-
-Run this to understand lists and loops, then apply it to the fragment data.`,
+Practice using lists and loops to analyze the fragment length data below.`,
           challenge: "Create a list of fragment lengths and calculate the total number of characters across all fragments.",
           data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]`,
-          starterCode: `# Try the example first, then adapt for fragment lengths
-scores = [85, 92, 78, 96, 88]
-total = 0
-for score in scores:
-    total = total + score
-print("Total points:", total)
-print("Number of tests:", len(scores))`,
+          starterCode: `# Create a list of fragment lengths and calculate totals
+# Fragment lengths: [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+
+# Your code here:
+`,
           solution: `fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
 total_characters = 0
 for length in fragment_lengths:
@@ -380,8 +391,7 @@ print("Number of fragments:", len(fragment_lengths))`,
           ]
         },
         {
-          title: "Decoding Fragment Languages",
-          story: `Dr. Rodriguez has identified that the fragments contain text in multiple ancient languages. Some fragments are in Latin, others in ancient Greek, and some in an unknown script. We need to categorize them to focus our translation efforts.
+          title: "Decoding Fragment Languages",          story: `Dr. Rodriguez has identified that the fragments contain text in multiple ancient languages. Some fragments are in Latin, others in ancient Greek, and some in an unknown script. We need to categorize them to focus our translation efforts.
 
 <strong>🔍 Python Concepts: Conditional Statements (if/elif)</strong>
 
@@ -391,34 +401,15 @@ print("Number of fragments:", len(fragment_lengths))`,
 • <code>==</code> compares values (different from <code>=</code> which assigns)
 • Remember to indent code inside if/elif blocks!
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-animals = ["cat", "dog", "cat", "bird", "dog", "cat"]
-cat_count = 0
-dog_count = 0
-for animal in animals:
-    if animal == "cat":
-        cat_count = cat_count + 1
-    elif animal == "dog":
-        dog_count = dog_count + 1
-print("Cats:", cat_count)
-print("Dogs:", dog_count)
-</div>
-
-Run this to understand conditionals, then adapt it for language codes.`,
+Practice using conditional statements to categorize the language codes below.`,
           challenge: "Analyze the language codes and count how many fragments we have for each language type.",
           data: `Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]`,
-          starterCode: `# Try the example first, then adapt for language codes
-animals = ["cat", "dog", "cat", "bird", "dog", "cat"]
-cat_count = 0
-dog_count = 0
-for animal in animals:
-    if animal == "cat":
-        cat_count = cat_count + 1
-    elif animal == "dog":
-        dog_count = dog_count + 1
-print("Cats:", cat_count)
-print("Dogs:", dog_count)`,
+          starterCode: `# Count language types using conditional statements
+# Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
+# LAT = Latin, GRK = Greek, UNK = Unknown
+
+# Your code here:
+`,
           solution: `languages = ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
 latin_count = 0
 greek_count = 0
@@ -441,8 +432,7 @@ print("Unknown fragments:", unknown_count)`,
           ]
         },
         {
-          title: "Dating Analysis",
-          story: `Carbon dating results have arrived! Each fragment has been assigned an estimated date range. By analyzing these dates, we might discover if all fragments belong to the same time period or if they span multiple eras.
+          title: "Dating Analysis",          story: `Carbon dating results have arrived! Each fragment has been assigned an estimated date range. By analyzing these dates, we might discover if all fragments belong to the same time period or if they span multiple eras.
 
 <strong>🔍 Python Concepts: Finding Min/Max and Range Checking</strong>
 
@@ -452,34 +442,14 @@ Finding the smallest and largest values in data:
 • Combine conditions: <code>if date >= 100 and date &lt; 200:</code>
 • Update tracking variables inside loops
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-temperatures = [72, 85, 68, 91, 79]
-hottest = temperatures[0]
-coldest = temperatures[0]
-for temp in temperatures:
-    if temp > hottest:
-        hottest = temp
-    if temp < coldest:
-        coldest = temp
-print("Hottest:", hottest)
-print("Coldest:", coldest)
-</div>
-
-Run this to understand min/max finding, then adapt it for the dating analysis.`,
+Practice finding minimum and maximum values in the dating data below.`,
           challenge: "Find the oldest and most recent fragments, and identify how many are from each century.",
           data: `Estimated dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]`,
-          starterCode: `# Try the example first, then adapt for fragment dates
-temperatures = [72, 85, 68, 91, 79]
-hottest = temperatures[0]
-coldest = temperatures[0]
-for temp in temperatures:
-    if temp > hottest:
-        hottest = temp
-    if temp < coldest:
-        coldest = temp
-print("Hottest:", hottest)
-print("Coldest:", coldest)`,
+          starterCode: `# Analyze fragment dates to find oldest, newest, and century distribution
+# Dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
+
+# Your code here:
+`,
           solution: `dates = [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
 oldest_date = dates[0]
 newest_date = dates[0]
