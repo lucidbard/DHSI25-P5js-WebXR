@@ -665,8 +665,320 @@ print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
           hints: [
             "startswith() checks if a string begins with specific characters",
             "append() adds items to a list: my_list.append(item)",
-            "'not in' checks if an item is NOT in a list",
-            "Access list items by index: my_list[0], my_list[1], etc."
+            "'not in' checks if an item is NOT in a list",            "Access list items by index: my_list[0], my_list[1], etc."
+          ]
+        },
+        {
+          title: "AI Assistant Integration",
+          story: `The archaeological team has gained access to an advanced AI assistant to help analyze the remaining fragments. Dr. Rodriguez wants to understand how to effectively communicate with AI systems to accelerate the research process.
+
+<strong>🤖 AI Concepts: Understanding AI Assistants</strong>
+
+AI assistants like ChatGPT, Claude, or GitHub Copilot can help with:
+• Writing code based on descriptions: "Create a function that calculates average"
+• Explaining existing code: "What does this loop do?"
+• Debugging errors: "Why am I getting this error message?"
+• Optimizing solutions: "How can I make this code more efficient?"
+
+AI assistants work best when you provide:
+• Clear, specific requests
+• Context about what you're trying to achieve
+• Examples of input and expected output
+• Information about any constraints or requirements
+
+<strong>Try this example interaction:</strong>
+<div class="data-sample">
+# Instead of writing from scratch, describe what you want:
+# "I need to find the average of a list of numbers"
+
+# AI-suggested solution:
+numbers = [45, 23, 67, 12, 89]
+total = sum(numbers)  # sum() is a built-in function
+average = total / len(numbers)
+print("Average fragment length:", average)
+</div>
+
+Run this to see AI-suggested code, then try asking an AI assistant to help with the analysis below.`,
+          challenge: "Use AI-assisted thinking to analyze metadata about the manuscript fragments. Practice describing what you want in clear language before writing code.",
+          data: `Fragment metadata: 
+Fragment IDs: ["F001", "F002", "F003", "F004", "F005"]
+Condition scores (1-10): [8, 3, 9, 6, 7]
+Translation difficulty (1-5): [2, 5, 1, 4, 3]`,
+          starterCode: `# Practice AI-assisted development:
+# Step 1: Describe your goal clearly
+# "I want to find which fragment has the best condition 
+#  and which is easiest to translate"
+
+# Step 2: Use AI suggestions or build incrementally
+fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
+condition_scores = [8, 3, 9, 6, 7]
+difficulty_scores = [2, 5, 1, 4, 3]
+
+# Your task: Find the best condition and easiest translation
+# Think about what "best" and "easiest" mean in terms of the numbers`,
+          solution: `fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
+condition_scores = [8, 3, 9, 6, 7]
+difficulty_scores = [2, 5, 1, 4, 3]
+
+# Find fragment with best condition (highest score)
+best_condition_index = 0
+for i in range(len(condition_scores)):
+    if condition_scores[i] > condition_scores[best_condition_index]:
+        best_condition_index = i
+
+# Find fragment with easiest translation (lowest difficulty)
+easiest_translation_index = 0
+for i in range(len(difficulty_scores)):
+    if difficulty_scores[i] < difficulty_scores[easiest_translation_index]:
+        easiest_translation_index = i
+
+print("Best condition fragment:", fragment_ids[best_condition_index])
+print("Condition score:", condition_scores[best_condition_index])
+print("Easiest to translate:", fragment_ids[easiest_translation_index])
+print("Difficulty score:", difficulty_scores[easiest_translation_index])
+
+# AI tip: Built-in functions can make this simpler!
+print("\\nUsing AI-suggested built-ins:")
+print("Best condition:", fragment_ids[condition_scores.index(max(condition_scores))])
+print("Easiest translation:", fragment_ids[difficulty_scores.index(min(difficulty_scores))])`,
+          hints: [
+            "When working with AI: Describe your goal before coding",
+            "Think about what 'best condition' means (highest number?)",
+            "Think about what 'easiest translation' means (lowest difficulty?)",
+            "AI assistants can suggest built-in functions like max(), min(), index()"
+          ]
+        },
+        {
+          title: "Effective Prompt Engineering",
+          story: `Dr. Rodriguez needs to extract specific information from a large database of ancient texts. She's learning that the way you ask questions to an AI system greatly affects the quality of the response.
+
+<strong>🎯 Prompt Engineering Principles:</strong>
+
+<strong>Be Specific:</strong>
+❌ "Help me with data analysis"
+✅ "Help me find the most common words in a list of ancient text fragments"
+
+<strong>Provide Context:</strong>
+❌ "Fix this code"
+✅ "This code should count languages but isn't working. I'm getting a NameError on line 3"
+
+<strong>Give Examples:</strong>
+❌ "Format the output nicely"
+✅ "Format like this: 'Fragment F001: Condition 8/10, Difficulty 2/5'"
+
+<strong>Specify Constraints:</strong>
+❌ "Make it better"
+✅ "Optimize for readability, avoid complex functions, explain each step"
+
+<strong>Try this example:</strong>
+<div class="data-sample">
+# Good prompt: "Create code to process archaeological data where
+# I have fragment IDs and need to pair them with analysis results,
+# then display in a readable format showing fragment ID and status"
+
+fragments = ["F001", "F002", "F003"]
+analysis_complete = [True, False, True]
+
+for i in range(len(fragments)):
+    status = "Complete" if analysis_complete[i] else "Pending"
+    print(f"Fragment {fragments[i]}: Analysis {status}")
+</div>
+
+Practice writing clear prompts for the task below.`,
+          challenge: "Practice prompt engineering by describing exactly what analysis you want to perform on the manuscript data, then implement it.",
+          data: `Research teams and their specialties:
+Teams: ["Linguistics", "Dating", "Preservation", "Digital"]
+Fragment assignments: [3, 2, 1, 4]
+Completion rates: [0.8, 1.0, 0.5, 0.9]`,
+          starterCode: `# PROMPT ENGINEERING PRACTICE:
+# Write a clear prompt describing what you want to analyze:
+# 
+# Example good prompt:
+# "I need to analyze research team performance. I have team names,
+#  number of fragments assigned, and completion rates (0.0-1.0).
+#  I want to find which team has the highest completion rate
+#  and display all teams with their performance metrics."
+
+# Your prompt (write it as a comment):
+# 
+
+# Now implement based on your prompt:
+teams = ["Linguistics", "Dating", "Preservation", "Digital"]
+assignments = [3, 2, 1, 4]
+completion_rates = [0.8, 1.0, 0.5, 0.9]
+
+# Your implementation here`,
+          solution: `# PROMPT ENGINEERING PRACTICE:
+# Good prompt: "Analyze research team performance by finding the team
+# with highest completion rate, calculating total fragments processed,
+# and displaying a performance report for each team showing name,
+# assignments, completion rate, and estimated completed fragments."
+
+teams = ["Linguistics", "Dating", "Preservation", "Digital"]
+assignments = [3, 2, 1, 4]
+completion_rates = [0.8, 1.0, 0.5, 0.9]
+
+# Find team with highest completion rate
+best_team_index = 0
+for i in range(len(completion_rates)):
+    if completion_rates[i] > completion_rates[best_team_index]:
+        best_team_index = i
+
+print("=== TEAM PERFORMANCE REPORT ===")
+print()
+
+# Display all team metrics
+for i in range(len(teams)):
+    completed_fragments = int(assignments[i] * completion_rates[i])
+    percentage = completion_rates[i] * 100
+    print(f"Team: {teams[i]}")
+    print(f"  Assigned: {assignments[i]} fragments")
+    print(f"  Completion Rate: {percentage:.0f}%")
+    print(f"  Estimated Completed: {completed_fragments} fragments")
+    print()
+
+print(f"🏆 Best Performance: {teams[best_team_index]} team")
+print(f"   Completion Rate: {completion_rates[best_team_index] * 100:.0f}%")
+
+# Calculate total project progress
+total_assigned = sum(assignments)
+total_completed = sum(assignments[i] * completion_rates[i] for i in range(len(teams)))
+overall_progress = total_completed / total_assigned * 100
+print(f"\\n📊 Overall Project Progress: {overall_progress:.1f}%")`,
+          hints: [
+            "Good prompts include: what data you have, what you want to find, how to display results",
+            "Be specific about calculations: 'highest rate', 'total completed', etc.",
+            "Think about what would be useful to display: percentages, rankings, summaries",
+            "Consider edge cases and formatting in your prompt"
+          ]
+        },
+        {
+          title: "AI-Powered Code Review and Optimization",
+          story: `The archaeological team has developed several analysis scripts, but they want to improve code quality and efficiency. Dr. Rodriguez is learning how to use AI assistants for code review, optimization, and best practices.
+
+<strong>🔍 AI Code Review Process:</strong>
+
+<strong>1. Code Review Prompts:</strong>
+• "Review this code for bugs and improvements"
+• "Check this code for best practices and readability"
+• "Suggest optimizations for performance"
+• "Explain what this code does and identify potential issues"
+
+<strong>2. Optimization Prompts:</strong>
+• "Make this code more efficient"
+• "Reduce the number of loops in this code"
+• "Use Python built-in functions to simplify this"
+• "Make this code more readable and maintainable"
+
+<strong>3. Learning Prompts:</strong>
+• "Explain why this solution is better than my original"
+• "What Python concepts should I learn to improve this code?"
+• "Show me three different ways to solve this problem"
+
+<strong>Example review process:</strong>
+<div class="data-sample">
+# Original code (works but could be better):
+manuscripts = ["MS1", "MS2", "MS3", "MS4"]
+priorities = [3, 1, 4, 2]
+urgent_manuscripts = []
+for i in range(len(manuscripts)):
+    if priorities[i] >= 3:
+        urgent_manuscripts.append(manuscripts[i])
+
+# AI-suggested improvement:
+manuscripts = ["MS1", "MS2", "MS3", "MS4"]
+priorities = [3, 1, 4, 2]
+urgent_manuscripts = [ms for ms, pri in zip(manuscripts, priorities) if pri >= 3]
+print("Urgent manuscripts:", urgent_manuscripts)
+</div>
+
+Practice reviewing and optimizing code with AI assistance.`,
+          challenge: "Review the inefficient code below and use AI thinking to identify improvements. Rewrite it using better practices.",
+          data: `Fragment Processing Status:
+Fragment IDs: ["F101", "F102", "F103", "F104", "F105", "F106"]
+Processing times (hours): [2.5, 1.2, 4.8, 3.1, 0.9, 2.3]
+Status: ["complete", "in-progress", "complete", "complete", "in-progress", "complete"]`,
+          starterCode: `# INEFFICIENT CODE TO REVIEW:
+# This code works but has several issues - identify and fix them
+
+fragment_ids = ["F101", "F102", "F103", "F104", "F105", "F106"]
+processing_times = [2.5, 1.2, 4.8, 3.1, 0.9, 2.3]
+status = ["complete", "in-progress", "complete", "complete", "in-progress", "complete"]
+
+# Find completed fragments
+completed_fragments = []
+completed_times = []
+counter = 0
+while counter < len(fragment_ids):
+    if status[counter] == "complete":
+        completed_fragments.append(fragment_ids[counter])
+        completed_times.append(processing_times[counter])
+    counter = counter + 1
+
+# Calculate average time for completed fragments
+total_time = 0
+for time in completed_times:
+    total_time = total_time + time
+average_time = total_time / len(completed_times)
+
+print("Completed fragments:", completed_fragments)
+print("Average processing time:", average_time)
+
+# Find fragment with longest processing time
+longest_time = 0
+longest_fragment = ""
+for i in range(len(fragment_ids)):
+    if processing_times[i] > longest_time:
+        longest_time = processing_times[i]
+        longest_fragment = fragment_ids[i]
+print("Longest processing time:", longest_fragment, "took", longest_time, "hours")`,
+          solution: `# OPTIMIZED CODE WITH AI IMPROVEMENTS:
+# Key improvements: list comprehensions, built-in functions, better variable names
+
+fragment_ids = ["F101", "F102", "F103", "F104", "F105", "F106"]
+processing_times = [2.5, 1.2, 4.8, 3.1, 0.9, 2.3]
+status = ["complete", "in-progress", "complete", "complete", "in-progress", "complete"]
+
+# AI Improvement 1: Use list comprehensions and zip for cleaner filtering
+completed_data = [(fid, time) for fid, time, stat in zip(fragment_ids, processing_times, status) if stat == "complete"]
+completed_fragments, completed_times = zip(*completed_data) if completed_data else ([], [])
+
+# AI Improvement 2: Use built-in functions for calculations
+average_time = sum(completed_times) / len(completed_times) if completed_times else 0
+
+print("=== PROCESSING ANALYSIS ===")
+print(f"Completed fragments: {list(completed_fragments)}")
+print(f"Average processing time: {average_time:.2f} hours")
+
+# AI Improvement 3: Use max() with key parameter for finding extremes
+longest_time_index = processing_times.index(max(processing_times))
+longest_fragment = fragment_ids[longest_time_index]
+longest_time = processing_times[longest_time_index]
+
+print(f"Longest processing: {longest_fragment} ({longest_time} hours)")
+
+# AI Improvement 4: Additional useful analysis
+in_progress = [fid for fid, stat in zip(fragment_ids, status) if stat == "in-progress"]
+completion_rate = len(completed_fragments) / len(fragment_ids) * 100
+
+print(f"\\nIn progress: {in_progress}")
+print(f"Completion rate: {completion_rate:.1f}%")
+
+# AI Improvement 5: Better data structure (bonus)
+print("\\n=== ALTERNATIVE: USING DICTIONARIES ===")
+fragments_data = [
+    {"id": fid, "time": time, "status": stat}
+    for fid, time, stat in zip(fragment_ids, processing_times, status)
+]
+
+completed = [f for f in fragments_data if f["status"] == "complete"]
+avg_time = sum(f["time"] for f in completed) / len(completed)
+print(f"Dictionary approach - Average time: {avg_time:.2f} hours")`,
+          hints: [
+            "Look for: while loops that could be for loops, manual calculations that could use built-ins",
+            "Consider: list comprehensions, zip(), max(), min(), sum() functions",
+            "Think about: variable names, code readability, duplicated logic",
+            "AI tip: Ask 'How can I make this more Pythonic?' for style improvements"
           ]
         }
       ];
@@ -821,16 +1133,17 @@ print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
         };
         buttonGroup.appendChild(completeButton);
       }
-    }
-
-    function getRequiredElements(stageNum) {
+    }    function getRequiredElements(stageNum) {
       const requirements = {
         1: ["catalog_number", "fragment_count", "print"],
         2: ["fragment_lengths", "for", "total_characters", "len"],
         3: ["languages", "if", "elif", "latin_count", "greek_count"],
         4: ["dates", "oldest_date", "newest_date", "second_century"],
         5: ["words", "temple_count", "most_frequent"],
-        6: ["coordinates", "startswith", "append", "unique_latitudes"]
+        6: ["coordinates", "startswith", "append", "unique_latitudes"],
+        7: ["fragment_ids", "condition_scores", "best_condition", "easiest_translation"],
+        8: ["teams", "completion_rates", "best_team", "performance"],
+        9: ["completed_fragments", "average_time", "longest_fragment", "optimization"]
       };
       return requirements[stageNum] || [];
     }
@@ -864,21 +1177,23 @@ print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
       setTimeout(() => {
         achievementArea.innerHTML = "";
       }, 3000);
-    }
-
-    function showFinalAchievement() {
+    }    function showFinalAchievement() {
       const achievementArea = document.getElementById("achievementArea");
       achievementArea.innerHTML = `
                 <div class="achievement">
                     🏛️ CONGRATULATIONS! 🏛️
-                    <br><strong>Master Digital Archaeologist</strong>
-                    <br>You've successfully decoded the ancient manuscript and discovered the hidden chamber beneath Alexandria!
+                    <br><strong>Master Digital Archaeologist & AI Collaborator</strong>
+                    <br>You've successfully decoded the ancient manuscript, discovered the hidden chamber beneath Alexandria, and mastered AI-assisted development!
                     <br><br>You've mastered:
                     <br>• Variables (strings, numbers, lists)
                     <br>• Conditional logic (if/elif statements)
                     <br>• Loops (for statements)
                     <br>• Data analysis techniques
-                    <br><br>Your computational skills have unlocked history itself!
+                    <br>• AI assistant collaboration
+                    <br>• Effective prompt engineering
+                    <br>• Code review and optimization
+                    <br><br>Your computational skills and AI collaboration have unlocked both ancient history and modern development practices!
+                    <br><br>🤖 Ready to work with AI assistants like ChatGPT, Claude, and GitHub Copilot to accelerate your coding journey!
                 </div>
             `;
     }
