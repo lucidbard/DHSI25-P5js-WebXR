@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Archaeology Mystery</title>
+  <script src="https://unpkg.com/skulpt@0.11.1/dist/skulpt.min.js" onload="console.log('Skulpt loaded')"
+    onerror="loadSkulptFallback()"></script>
+  <script src="https://unpkg.com/skulpt@0.11.1/dist/skulpt-stdlib.js" onload="console.log('Skulpt stdlib loaded')"
+    onerror="console.error('Failed to load Skulpt stdlib')"></script>
+  <script>
+    // Fallback function to load Skulpt from alternative CDN
+    function loadSkulptFallback() {
+      console.log('Trying fallback CDN for Skulpt...');
+      const script1 = document.createElement('script');
+      script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/skulpt/0.11.1/skulpt.min.js';
+      script1.onload = () => console.log('Skulpt loaded from fallback');
+      script1.onerror = () => console.error('All CDNs failed for Skulpt');
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement('script');
+      script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/skulpt/0.11.1/skulpt-stdlib.js';
+      script2.onload = () => console.log('Skulpt stdlib loaded from fallback');
+      document.head.appendChild(script2);
+    }
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #2c1810, #4a3429);
+      color: #f4f1e8;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      border: 2px solid #8b7355;
+    }
+
+    h1 {
+      color: #d4af37;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .subtitle {
+      color: #c9b037;
+      font-style: italic;
+      font-size: 1.2em;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #3a2c1f;
+      border-radius: 10px;
+      margin: 20px 0;
+      border: 1px solid #8b7355;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d4af37, #ffd700);
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .story-panel,
+    .code-panel {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid #8b7355;
+    }
+
+    .story-panel h2,
+    .code-panel h2 {
+      color: #d4af37;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #8b7355;
+      padding-bottom: 10px;
+    }
+
+    .challenge-text {
+      background: rgba(139, 115, 85, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #d4af37;
+    }
+
+    .code-editor {
+      width: 100%;
+      height: 200px;
+      background: #1e1e1e;
+      color: #f8f8f2;
+      border: 1px solid #8b7355;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    .button-group {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #8b7355, #a0845c);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #a0845c, #b8956b);
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .output {
+      background: #0f1419;
+      border: 1px solid #8b7355;
+      border-radius: 5px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .success {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+    }
+
+    .error {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .hint {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .achievement {
+      background: linear-gradient(135deg, #d4af37, #ffd700);
+      color: #1a1a1a;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      text-align: center;
+      font-weight: bold;
+      animation: glow 2s ease-in-out;
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+      }
+    }
+
+    .data-sample {
+      background: #2a2a2a;
+      border: 1px solid #8b7355;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .game-area {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏛️ Digital Archaeology Mystery</h1>
+      <p class="subtitle">Code Your Way Through Ancient Secrets</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p>Stage <span id="currentStage">1</span> of <span id="totalStages">6</span></p>
+    </div>
+
+    <div class="game-area">
+      <div class="story-panel">
+        <h2>📜 Investigation Log</h2>
+        <div id="storyContent"></div>
+        <div class="challenge-text" id="challengeText"></div>
+        <div id="dataDisplay"></div>
+      </div>
+
+      <div class="code-panel">
+        <h2>💻 Digital Analysis Tools</h2>
+        <textarea id="codeEditor" class="code-editor" placeholder="Write your Python code here..."></textarea>
+
+        <div class="button-group">
+          <button onclick="runCode()">🔍 Run Analysis</button>
+          <button onclick="getHint()">💡 Request Hint</button>
+          <button onclick="resetCode()">🔄 Reset Code</button>
+        </div>
+
+        <div id="output" class="output"></div>
+        <div id="hintArea"></div>
+      </div>
+    </div>
+
+    <div id="achievementArea"></div>
+  </div>
+
+  <script>
+    // Game state
+    let currentStage = 1;
+    const totalStages = 6;
+    let stages = [];
+
+    // Initialize Skulpt for Python execution
+    function outf(text) {
+      const output = document.getElementById("output");
+      output.textContent += text;
+    }
+
+    function builtinRead(x) {
+      if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+        throw "File not found: '" + x + "'";
+      return Sk.builtinFiles["files"][x];
+    }
+
+    // Game stages definition
+    function initializeStages() {
+      stages = [
+        {
+          title: "The Mysterious Manuscript",
+          story: `Dr. Elena Rodriguez has discovered fragments of an ancient manuscript in the digital archives of the Alexandria Library. The fragments contain references to a lost civilization, but they're scattered and encoded. 
+
+You've been called in as a digital archaeologist to help piece together this mystery using computational analysis.
+
+<strong>🔍 Python Concepts: Variables and Print Statements</strong>
+
+In Python, we store information in <em>variables</em>. Think of variables as labeled boxes that hold data:
+• Text (strings) must be in quotes: <code>name = "Alexandria"</code>
+• Numbers don't need quotes: <code>count = 23</code>
+• Use <code>print()</code> to display information
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+location = "Library of Alexandria"
+year_discovered = 2024
+print("Discovery location:", location)
+print("Year:", year_discovered)
+</div>
+
+Run this code to see how variables work, then modify it to use the manuscript data below.`,
+          challenge: "Your task: Store the manuscript's catalog number and initial fragment count as variables, then display them using print statements.",
+          data: `Manuscript ID: "MS-ALEX-2847"
+Fragment Count: 23`,
+          starterCode: `# Try the example first, then replace with manuscript data
+location = "Library of Alexandria"
+year_discovered = 2024
+print("Discovery location:", location)
+print("Year:", year_discovered)`,
+          solution: `catalog_number = "MS-ALEX-2847"
+fragment_count = 23
+print("Manuscript Catalog:", catalog_number)
+print("Fragments Found:", fragment_count)`,
+          hints: [
+            "Variables store data. Use = to assign values to variable names.",
+            "String variables need quotes: my_text = \"Hello\"",
+            "Number variables don't need quotes: my_number = 42",
+            "Use print() to display variable contents."
+          ]
+        },
+        {
+          title: "Analyzing Fragment Lengths",
+          story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
+
+<strong>🔍 Python Concepts: Lists and For Loops</strong>
+
+<em>Lists</em> store multiple values in a single variable:
+• Create lists with square brackets: <code>numbers = [1, 2, 3, 4]</code>
+• <em>For loops</em> let you process each item: <code>for item in my_list:</code>
+• <code>len()</code> returns how many items are in a list
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+scores = [85, 92, 78, 96, 88]
+total = 0
+for score in scores:
+    total = total + score
+print("Total points:", total)
+print("Number of tests:", len(scores))
+</div>
+
+Run this to understand lists and loops, then apply it to the fragment data.`,
+          challenge: "Create a list of fragment lengths and calculate the total number of characters across all fragments.",
+          data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]`,
+          starterCode: `# Try the example first, then adapt for fragment lengths
+scores = [85, 92, 78, 96, 88]
+total = 0
+for score in scores:
+    total = total + score
+print("Total points:", total)
+print("Number of tests:", len(scores))`,
+          solution: `fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+total_characters = 0
+for length in fragment_lengths:
+    total_characters = total_characters + length
+print("Total characters:", total_characters)
+print("Number of fragments:", len(fragment_lengths))`,
+          hints: [
+            "Lists store multiple values: my_list = [1, 2, 3]",
+            "For loops iterate through each item: for item in my_list:",
+            "len() function returns the length of a list",
+            "Use += as shorthand for adding: total += value"
+          ]
+        },
+        {
+          title: "Decoding Fragment Languages",
+          story: `Dr. Rodriguez has identified that the fragments contain text in multiple ancient languages. Some fragments are in Latin, others in ancient Greek, and some in an unknown script. We need to categorize them to focus our translation efforts.
+
+<strong>🔍 Python Concepts: Conditional Statements (if/elif)</strong>
+
+<em>Conditional statements</em> let your program make decisions:
+• <code>if</code> checks a condition: <code>if age >= 18:</code>
+• <code>elif</code> checks additional conditions: <code>elif age >= 13:</code>
+• <code>==</code> compares values (different from <code>=</code> which assigns)
+• Remember to indent code inside if/elif blocks!
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+animals = ["cat", "dog", "cat", "bird", "dog", "cat"]
+cat_count = 0
+dog_count = 0
+for animal in animals:
+    if animal == "cat":
+        cat_count = cat_count + 1
+    elif animal == "dog":
+        dog_count = dog_count + 1
+print("Cats:", cat_count)
+print("Dogs:", dog_count)
+</div>
+
+Run this to understand conditionals, then adapt it for language codes.`,
+          challenge: "Analyze the language codes and count how many fragments we have for each language type.",
+          data: `Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]`,
+          starterCode: `# Try the example first, then adapt for language codes
+animals = ["cat", "dog", "cat", "bird", "dog", "cat"]
+cat_count = 0
+dog_count = 0
+for animal in animals:
+    if animal == "cat":
+        cat_count = cat_count + 1
+    elif animal == "dog":
+        dog_count = dog_count + 1
+print("Cats:", cat_count)
+print("Dogs:", dog_count)`,
+          solution: `languages = ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
+latin_count = 0
+greek_count = 0
+unknown_count = 0
+for lang in languages:
+    if lang == "LAT":
+        latin_count = latin_count + 1
+    elif lang == "GRK":
+        greek_count = greek_count + 1
+    elif lang == "UNK":
+        unknown_count = unknown_count + 1
+print("Latin fragments:", latin_count)
+print("Greek fragments:", greek_count)
+print("Unknown fragments:", unknown_count)`,
+          hints: [
+            "if statements check conditions: if variable == \"value\":",
+            "elif handles additional conditions: elif variable == \"other\":",
+            "Use == to compare values (not = which assigns)",
+            "Remember to indent code inside if/elif blocks"
+          ]
+        },
+        {
+          title: "Dating Analysis",
+          story: `Carbon dating results have arrived! Each fragment has been assigned an estimated date range. By analyzing these dates, we might discover if all fragments belong to the same time period or if they span multiple eras.
+
+<strong>🔍 Python Concepts: Finding Min/Max and Range Checking</strong>
+
+Finding the smallest and largest values in data:
+• Access list items by index: <code>my_list[0]</code> gets the first item
+• Compare numbers: <code>if date &lt; oldest_date:</code>
+• Combine conditions: <code>if date >= 100 and date &lt; 200:</code>
+• Update tracking variables inside loops
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+temperatures = [72, 85, 68, 91, 79]
+hottest = temperatures[0]
+coldest = temperatures[0]
+for temp in temperatures:
+    if temp > hottest:
+        hottest = temp
+    if temp < coldest:
+        coldest = temp
+print("Hottest:", hottest)
+print("Coldest:", coldest)
+</div>
+
+Run this to understand min/max finding, then adapt it for the dating analysis.`,
+          challenge: "Find the oldest and most recent fragments, and identify how many are from each century.",
+          data: `Estimated dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]`,
+          starterCode: `# Try the example first, then adapt for fragment dates
+temperatures = [72, 85, 68, 91, 79]
+hottest = temperatures[0]
+coldest = temperatures[0]
+for temp in temperatures:
+    if temp > hottest:
+        hottest = temp
+    if temp < coldest:
+        coldest = temp
+print("Hottest:", hottest)
+print("Coldest:", coldest)`,
+          solution: `dates = [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
+oldest_date = dates[0]
+newest_date = dates[0]
+for date in dates:
+    if date < oldest_date:
+        oldest_date = date
+    if date > newest_date:
+        newest_date = date
+print("Oldest fragment:", oldest_date, "CE")
+print("Newest fragment:", newest_date, "CE")
+second_century = 0
+third_century = 0
+fourth_century = 0
+for date in dates:
+    if date >= 100 and date < 200:
+        second_century = second_century + 1
+    elif date >= 200 and date < 300:
+        third_century = third_century + 1
+    elif date >= 300 and date < 400:
+        fourth_century = fourth_century + 1
+print("2nd century fragments:", second_century)
+print("3rd century fragments:", third_century)
+print("4th century fragments:", fourth_century)`,
+          hints: [
+            "Access list items by index: my_list[0] gets the first item",
+            "Use < and > to compare numbers: if number < 100:",
+            "Combine conditions with 'and': if x >= 100 and x < 200:",
+            "Update variables inside loops to track minimum/maximum values"
+          ]
+        }, {
+          title: "Word Frequency Analysis",
+          story: `Dr. Rodriguez has translated several key fragments and noticed repeated words that might be significant. These recurring terms could be names, places, or important concepts that unlock the manuscript's meaning.
+
+<strong>🔍 Python Concepts: String Comparison and Finding Maximum Values</strong>
+
+When analyzing text data, we often need to:
+• Compare strings using <code>==</code>: <code>if word == "temple":</code>
+• Count occurrences by checking each item in a list
+• Find the maximum value by comparing numbers
+• Convert numbers to strings for display: <code>str(count)</code>
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+fruits = ["apple", "banana", "apple", "orange", "banana", "apple"]
+apple_count = 0
+banana_count = 0
+for fruit in fruits:
+    if fruit == "apple":
+        apple_count = apple_count + 1
+    elif fruit == "banana":
+        banana_count = banana_count + 1
+print("Apples:", apple_count)
+print("Bananas:", banana_count)
+if apple_count > banana_count:
+    print("More apples than bananas!")
+</div>
+
+Run this to understand string comparison and counting, then adapt it for the manuscript words.`,
+          challenge: "Count the frequency of important words across the translated fragments to identify the most significant terms.",
+          data: `Key words found: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]`, starterCode: `# Try the example first, then adapt for manuscript words
+fruits = ["apple", "banana", "apple", "orange", "banana", "apple"]
+apple_count = 0
+banana_count = 0
+for fruit in fruits:
+    if fruit == "apple":
+        apple_count = apple_count + 1
+    elif fruit == "banana":
+        banana_count = banana_count + 1
+print("Apples:", apple_count)
+print("Bananas:", banana_count)`,
+          solution: `words = ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
+temple_count = 0
+gold_count = 0
+alexandria_count = 0
+scroll_count = 0
+wisdom_count = 0
+for word in words:
+    if word == "temple":
+        temple_count = temple_count + 1
+    elif word == "gold":
+        gold_count = gold_count + 1
+    elif word == "alexandria":
+        alexandria_count = alexandria_count + 1
+    elif word == "scroll":
+        scroll_count = scroll_count + 1
+    elif word == "wisdom":
+        wisdom_count = wisdom_count + 1
+print("Word frequencies:")
+print("temple:", temple_count)
+print("gold:", gold_count)
+print("alexandria:", alexandria_count)
+print("scroll:", scroll_count)
+print("wisdom:", wisdom_count)
+max_count = 0
+most_frequent = ""
+if temple_count > max_count:
+    max_count = temple_count
+    most_frequent = "temple"
+if gold_count > max_count:
+    max_count = gold_count
+    most_frequent = "gold"
+if alexandria_count > max_count:
+    max_count = alexandria_count
+    most_frequent = "alexandria"
+print("Most frequent word:", most_frequent, "(" + str(max_count) + " times)")`,
+          hints: [
+            "String comparison works like numbers: if word == \"temple\":",
+            "Track the maximum value by comparing with previous max",
+            "str() converts numbers to strings for concatenation",
+            "Use separate if statements (not elif) when you want to check all conditions"
+          ]
+        }, {
+          title: "The Final Revelation",
+          story: `Your analysis has revealed something extraordinary! The fragments aren't just random texts - they're coordinates, directions, and clues to a hidden chamber beneath the Library of Alexandria. The repeated word "temple" refers to a secret repository of scrolls that survived the library's destruction.
+
+<strong>🔍 Python Concepts: String Methods and List Operations</strong>
+
+Advanced string and list techniques for data processing:
+• <code>startswith()</code> checks if a string begins with specific characters: <code>if text.startswith("N"):</code>
+• <code>append()</code> adds items to a list: <code>my_list.append(item)</code>
+• <code>not in</code> checks if something is NOT in a list: <code>if item not in my_list:</code>
+• String concatenation with <code>+</code>: <code>"Hello " + "World"</code>
+
+<strong>Try this example first:</strong>
+<div class="data-sample">
+codes = ["USER123", "ADMIN456", "USER789", "GUEST111"]
+user_codes = []
+admin_codes = []
+for code in codes:
+    if code.startswith("USER"):
+        user_codes.append(code)
+    elif code.startswith("ADMIN"):
+        admin_codes.append(code)
+print("User codes:", user_codes)
+print("Admin codes:", admin_codes)
+print("Total codes processed:", len(codes))
+</div>
+
+Run this to understand string methods and list operations, then apply it to decode the coordinates.`,
+          challenge: "Process the coordinate fragments to reveal the location of the hidden chamber.",
+          data: `Coordinate clues: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]`, starterCode: `# Try the example first, then adapt for coordinates
+codes = ["USER123", "ADMIN456", "USER789", "GUEST111"]
+user_codes = []
+admin_codes = []
+for code in codes:
+    if code.startswith("USER"):
+        user_codes.append(code)
+    elif code.startswith("ADMIN"):
+        admin_codes.append(code)
+print("User codes:", user_codes)
+print("Admin codes:", admin_codes)`,
+          solution: `coordinates = ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
+latitude_coords = []
+longitude_coords = []
+depth_coords = []
+for coord in coordinates:
+    if coord.startswith("N"):
+        latitude_coords.append(coord)
+    elif coord.startswith("E"):
+        longitude_coords.append(coord)
+    elif coord.startswith("depth"):
+        depth_coords.append(coord)
+print("Latitude references:")
+for lat in latitude_coords:
+    print(" ", lat)
+print("Longitude references:")
+for lon in longitude_coords:
+    print(" ", lon)
+print("Depth references:")
+for depth in depth_coords:
+    print(" ", depth)
+unique_latitudes = []
+unique_longitudes = []
+for coord in latitude_coords:
+    if coord not in unique_latitudes:
+        unique_latitudes.append(coord)
+for coord in longitude_coords:
+    if coord not in unique_longitudes:
+        unique_longitudes.append(coord)
+print("\\nFinal coordinates:")
+print("Latitude:", unique_latitudes[0])
+print("Longitude:", unique_longitudes[0] + " to " + unique_longitudes[1])
+print("Depth: 15 meters below surface")
+print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
+          hints: [
+            "startswith() checks if a string begins with specific characters",
+            "append() adds items to a list: my_list.append(item)",
+            "'not in' checks if an item is NOT in a list",
+            "Access list items by index: my_list[0], my_list[1], etc."
+          ]
+        }
+      ];
+    } function loadStage(stageNum) {
+      const stage = stages[stageNum - 1];
+
+      document.getElementById("currentStage").textContent = stageNum;
+      document.getElementById("storyContent").innerHTML = `
+                <h3>${stage.title}</h3>
+                <p>${stage.story}</p>
+            `;
+
+      document.getElementById("challengeText").innerHTML = `
+                <strong>Your Task:</strong> ${stage.challenge}
+            `;
+
+      if (stage.data) {
+        document.getElementById("dataDisplay").innerHTML = `
+                    <div class="data-sample">
+                        <strong>Data to Analyze:</strong><br>
+                        ${stage.data.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+      }
+
+      document.getElementById("codeEditor").value = stage.starterCode;
+      document.getElementById("output").textContent = "";
+      document.getElementById("hintArea").innerHTML = "";
+
+      // Remove next stage button if present
+      const existingNextBtn = document.getElementById('nextStageBtn');
+      if (existingNextBtn) {
+        existingNextBtn.remove();
+      }
+
+      // Update progress bar
+      const progress = (stageNum / totalStages) * 100;
+      document.getElementById("progressFill").style.width = progress + "%";
+    }
+
+    function runCode() {
+      const code = document.getElementById("codeEditor").value;
+      const output = document.getElementById("output");
+
+      output.textContent = "";
+      output.className = "output";
+
+      // Check if Skulpt is loaded
+      if (typeof Sk === 'undefined') {
+        // Fallback mode - simulate some basic functionality
+        output.className = "output error";
+        output.textContent = "🔍 Python interpreter loading... If this persists, the game is running in demo mode.\n\nYour code would execute:\n" + code;
+
+        // Still check the solution structure for demo purposes
+        setTimeout(() => {
+          checkSolution(code);
+        }, 1000);
+        return;
+      }
+
+      Sk.pre = "output";
+      Sk.configure({
+        output: outf,
+        read: builtinRead,
+        execLimit: 10000
+      });
+
+      try {
+        const promise = Sk.misceval.asyncToPromise(function () {
+          return Sk.importMainWithBody("<stdin>", false, code, true);
+        });
+
+        promise.then(function (mod) {
+          checkSolution(code);
+        }, function (err) {
+          output.className = "output error";
+          output.textContent = generateErrorFeedback(err.toString());
+        });
+      } catch (err) {
+        output.className = "output error";
+        output.textContent = generateErrorFeedback(err.toString());
+      }
+    }
+
+    function generateErrorFeedback(error) {
+      const stage = stages[currentStage - 1];
+
+      if (error.includes("SyntaxError")) {
+        return `🔍 Digital Analysis Error: Syntax issue detected!\n\nThe computer doesn't understand part of your code. Check for:\n• Missing quotes around text\n• Incorrect indentation\n• Missing colons after if/for statements\n\nOriginal error: ${error}`;
+      } else if (error.includes("NameError")) {
+        return `🔍 Archaeological Note: Variable not found!\n\nYou're trying to use a variable that hasn't been defined yet. Make sure you:\n• Spell variable names correctly\n• Define variables before using them\n\nOriginal error: ${error}`;
+      } else if (error.includes("IndentationError")) {
+        return `🔍 Manuscript Format Error: Indentation issue!\n\nPython uses indentation (spaces) to group code. Make sure:\n• Code inside if/for statements is indented\n• Use consistent spacing (4 spaces recommended)\n\nOriginal error: ${error}`;
+      } else {
+        return `🔍 Analysis Error: ${error}\n\nDon't worry! Debugging is part of the archaeological process. Check your code carefully and try again.`;
+      }
+    } function checkSolution(code) {
+      const stage = stages[currentStage - 1];
+      const output = document.getElementById("output");
+
+      // Simple solution checking - in a real implementation, you'd want more sophisticated checking
+      const requiredElements = getRequiredElements(currentStage);
+      let passed = true;
+      let feedback = [];
+
+      for (let element of requiredElements) {
+        if (!code.includes(element)) {
+          passed = false;
+          feedback.push(`Missing: ${element}`);
+        }
+      }
+
+      if (passed) {
+        output.className = "output success";
+        showAchievement(stage.title);
+        showNextStageButton();
+      }
+    }
+
+    function showNextStageButton() {
+      const buttonGroup = document.querySelector('.button-group');
+
+      // Remove existing next button if present
+      const existingNextBtn = document.getElementById('nextStageBtn');
+      if (existingNextBtn) {
+        existingNextBtn.remove();
+      }
+
+      if (currentStage < totalStages) {
+        const nextButton = document.createElement('button');
+        nextButton.id = 'nextStageBtn';
+        nextButton.textContent = '🏛️ Continue to Next Stage';
+        nextButton.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
+        nextButton.style.color = '#1a1a1a';
+        nextButton.style.fontWeight = 'bold';
+        nextButton.onclick = () => {
+          currentStage++;
+          loadStage(currentStage);
+          nextButton.remove();
+        };
+        buttonGroup.appendChild(nextButton);
+      } else {
+        const completeButton = document.createElement('button');
+        completeButton.id = 'nextStageBtn';
+        completeButton.textContent = '🏛️ View Final Achievement';
+        completeButton.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
+        completeButton.style.color = '#1a1a1a';
+        completeButton.style.fontWeight = 'bold';
+        completeButton.onclick = () => {
+          showFinalAchievement();
+          completeButton.remove();
+        };
+        buttonGroup.appendChild(completeButton);
+      }
+    }
+
+    function getRequiredElements(stageNum) {
+      const requirements = {
+        1: ["catalog_number", "fragment_count", "print"],
+        2: ["fragment_lengths", "for", "total_characters", "len"],
+        3: ["languages", "if", "elif", "latin_count", "greek_count"],
+        4: ["dates", "oldest_date", "newest_date", "second_century"],
+        5: ["words", "temple_count", "most_frequent"],
+        6: ["coordinates", "startswith", "append", "unique_latitudes"]
+      };
+      return requirements[stageNum] || [];
+    }
+
+    function getHint() {
+      const stage = stages[currentStage - 1];
+      const hintArea = document.getElementById("hintArea");
+
+      if (stage.hints && stage.hints.length > 0) {
+        const randomHint = stage.hints[Math.floor(Math.random() * stage.hints.length)];
+        hintArea.innerHTML = `<div class="hint">💡 <strong>Archaeological Insight:</strong> ${randomHint}</div>`;
+      }
+    }
+
+    function resetCode() {
+      const stage = stages[currentStage - 1];
+      document.getElementById("codeEditor").value = stage.starterCode;
+      document.getElementById("output").textContent = "";
+      document.getElementById("hintArea").innerHTML = "";
+    }
+
+    function showAchievement(title) {
+      const achievementArea = document.getElementById("achievementArea");
+      achievementArea.innerHTML = `
+                <div class="achievement">
+                    🏆 Achievement Unlocked: ${title} Complete!
+                    <br>You've mastered another piece of the digital archaeology puzzle!
+                </div>
+            `;
+
+      setTimeout(() => {
+        achievementArea.innerHTML = "";
+      }, 3000);
+    }
+
+    function showFinalAchievement() {
+      const achievementArea = document.getElementById("achievementArea");
+      achievementArea.innerHTML = `
+                <div class="achievement">
+                    🏛️ CONGRATULATIONS! 🏛️
+                    <br><strong>Master Digital Archaeologist</strong>
+                    <br>You've successfully decoded the ancient manuscript and discovered the hidden chamber beneath Alexandria!
+                    <br><br>You've mastered:
+                    <br>• Variables (strings, numbers, lists)
+                    <br>• Conditional logic (if/elif statements)
+                    <br>• Loops (for statements)
+                    <br>• Data analysis techniques
+                    <br><br>Your computational skills have unlocked history itself!
+                </div>
+            `;
+    }
+
+    // Initialize the game
+    document.addEventListener('DOMContentLoaded', function () {
+      initializeStages();
+      loadStage(1);
+
+      // Add keyboard shortcut for running code
+      document.getElementById('codeEditor').addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          runCode();
+        }
+      });
+
+      // Add tab support in code editor
+      document.getElementById('codeEditor').addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 4;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
