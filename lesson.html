@@ -1027,13 +1027,19 @@ ${stage.data.replace(/\n/g, '<br>')}
         output.className = "output error";
         output.textContent = generateErrorFeedback(err.toString());
       }
-    }
-
-    function generateErrorFeedback(error) {
+    }    function generateErrorFeedback(error) {
       const stage = stages[currentStage - 1];
 
-      if (error.includes("SyntaxError")) {
-        return `🔍 Digital Analysis Error: Syntax issue detected!\n\nThe computer doesn't understand part of your code. Check for:\n• Missing quotes around text\n• Incorrect indentation\n• Missing colons after if/for statements\n\nOriginal error: ${error}`;
+      // Check for unbalanced parentheses first (most specific)
+      if (error.includes("SyntaxError") && 
+          (error.includes("unexpected EOF") || 
+           error.includes("')'") || 
+           error.includes("unmatched") ||
+           error.includes("closing parenthesis") ||
+           error.includes("opening parenthesis"))) {
+        return `🔍 Digital Analysis Error: Unbalanced parentheses detected!\n\nYour code has mismatched parentheses ( ). Check for:\n• Every opening parenthesis ( has a matching closing parenthesis )\n• Parentheses are in the correct order\n• No extra or missing parentheses in function calls like print()\n\nTip: Count your parentheses - they should be balanced!\n\nOriginal error: ${error}`;
+      } else if (error.includes("SyntaxError")) {
+        return `🔍 Digital Analysis Error: Syntax issue detected!\n\nThe computer doesn't understand part of your code. Check for:\n• Missing quotes around text\n• Incorrect indentation\n• Missing colons after if/for statements\n• Unbalanced parentheses ( )\n\nOriginal error: ${error}`;
       } else if (error.includes("NameError")) {
         return `🔍 Archaeological Note: Variable not found!\n\nYou're trying to use a variable that hasn't been defined yet. Make sure you:\n• Spell variable names correctly\n• Define variables before using them\n\nOriginal error: ${error}`;
       } else if (error.includes("IndentationError")) {
@@ -1041,7 +1047,7 @@ ${stage.data.replace(/\n/g, '<br>')}
       } else {
         return `🔍 Analysis Error: ${error}\n\nDon't worry! Debugging is part of the archaeological process. Check your code carefully and try again.`;
       }
-    } function checkSolution(code) {
+    }function checkSolution(code) {
       const stage = stages[currentStage - 1];
       const output = document.getElementById("output");
 

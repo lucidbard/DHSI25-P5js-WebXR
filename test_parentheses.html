@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Parentheses Error Detection</title>
+    <script src="https://unpkg.com/skulpt@0.11.1/dist/skulpt.min.js"></script>
+    <script src="https://unpkg.com/skulpt@0.11.1/dist/skulpt-stdlib.js"></script>
+</head>
+<body>
+    <h1>Test Unbalanced Parentheses Detection</h1>
+    
+    <h2>Test Case 1: Missing closing parenthesis</h2>
+    <textarea id="test1" rows="3" cols="50">
+print("Hello World"
+x = 5
+    </textarea>
+    <button onclick="testCode('test1')">Test 1</button>
+    <div id="result1"></div>
+    
+    <h2>Test Case 2: Extra closing parenthesis</h2>
+    <textarea id="test2" rows="3" cols="50">
+print("Hello World"))
+x = 5
+    </textarea>
+    <button onclick="testCode('test2')">Test 2</button>
+    <div id="result2"></div>
+    
+    <h2>Test Case 3: Unmatched parentheses</h2>
+    <textarea id="test3" rows="3" cols="50">
+result = (5 + 3 * 2
+print(result)
+    </textarea>
+    <button onclick="testCode('test3')">Test 3</button>
+    <div id="result3"></div>
+
+    <script>
+        // Copy the generateErrorFeedback function from lesson.html
+        function generateErrorFeedback(error) {
+            // Check for unbalanced parentheses first (most specific)
+            if (error.includes("SyntaxError") && 
+                (error.includes("unexpected EOF") || 
+                 error.includes("')'") || 
+                 error.includes("unmatched") ||
+                 error.includes("closing parenthesis") ||
+                 error.includes("opening parenthesis"))) {
+                return `🔍 Digital Analysis Error: Unbalanced parentheses detected!\n\nYour code has mismatched parentheses ( ). Check for:\n• Every opening parenthesis ( has a matching closing parenthesis )\n• Parentheses are in the correct order\n• No extra or missing parentheses in function calls like print()\n\nTip: Count your parentheses - they should be balanced!\n\nOriginal error: ${error}`;
+            } else if (error.includes("SyntaxError")) {
+                return `🔍 Digital Analysis Error: Syntax issue detected!\n\nThe computer doesn't understand part of your code. Check for:\n• Missing quotes around text\n• Incorrect indentation\n• Missing colons after if/for statements\n• Unbalanced parentheses ( )\n\nOriginal error: ${error}`;
+            } else if (error.includes("NameError")) {
+                return `🔍 Archaeological Note: Variable not found!\n\nYou're trying to use a variable that hasn't been defined yet. Make sure you:\n• Spell variable names correctly\n• Define variables before using them\n\nOriginal error: ${error}`;
+            } else if (error.includes("IndentationError")) {
+                return `🔍 Manuscript Format Error: Indentation issue!\n\nPython uses indentation (spaces) to group code. Make sure:\n• Code inside if/for statements is indented\n• Use consistent spacing (4 spaces recommended)\n\nOriginal error: ${error}`;
+            } else {
+                return `🔍 Analysis Error: ${error}\n\nDon't worry! Debugging is part of the archaeological process. Check your code carefully and try again.`;
+            }
+        }
+
+        function outf(text) {
+            // Output function for Skulpt
+        }
+
+        function builtinRead(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                throw "File not found: '" + x + "'";
+            return Sk.builtinFiles["files"][x];
+        }
+
+        function testCode(testId) {
+            const code = document.getElementById(testId).value;
+            const resultDiv = document.getElementById('result' + testId.slice(-1));
+            
+            Sk.pre = "output";
+            Sk.configure({
+                output: outf,
+                read: builtinRead,
+                execLimit: 10000
+            });
+
+            try {
+                const promise = Sk.misceval.asyncToPromise(function () {
+                    return Sk.importMainWithBody("<stdin>", false, code, true);
+                });
+
+                promise.then(function (mod) {
+                    resultDiv.innerHTML = '<span style="color: green;">✅ Code executed successfully!</span>';
+                }, function (err) {
+                    const feedback = generateErrorFeedback(err.toString());
+                    resultDiv.innerHTML = '<div style="color: red; white-space: pre-wrap; font-family: monospace; border: 1px solid red; padding: 10px; margin: 10px 0;">' + feedback + '</div>';
+                });
+            } catch (err) {
+                const feedback = generateErrorFeedback(err.toString());
+                resultDiv.innerHTML = '<div style="color: red; white-space: pre-wrap; font-family: monospace; border: 1px solid red; padding: 10px; margin: 10px 0;">' + feedback + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>
