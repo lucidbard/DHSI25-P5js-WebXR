@@ -108,13 +108,63 @@
       padding-bottom: 10px;
     }
 
+    /* Story content formatting */
+    .story-panel p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .story-text {
+      line-height: 1.6;
+    }
+
+    .story-text p {
+      margin-bottom: 15px;
+    }
+
+    .story-panel strong,
+    .story-text strong {
+      color: #d4af37;
+      font-weight: bold;
+    }
+
+    .story-panel em,
+    .story-text em {
+      color: #c9b037;
+      font-style: italic;
+    }
+
+    .story-panel code,
+    .story-text code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      color: #60a5fa;
+      font-size: 0.9em;
+    }
+
+    .story-panel ul,
+    .story-text ul {
+      margin: 10px 0 15px 20px;
+      list-style-type: disc;
+    }
+
+    .story-panel li,
+    .story-text li {
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
     .challenge-text {
       background: rgba(139, 115, 85, 0.2);
       padding: 15px;
       border-radius: 8px;
       margin: 15px 0;
       border-left: 4px solid #d4af37;
-    }    .code-editor {
+    }
+
+    .code-editor {
       width: 100%;
       height: 200px;
       background: #ffffff;
@@ -126,7 +176,7 @@
       font-size: 14px;
       resize: vertical;
       line-height: 1.4;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .jupyter-cell {
@@ -134,7 +184,7 @@
       border: 1px solid #cfcfcf;
       border-radius: 8px;
       margin: 20px 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .cell-header {
@@ -205,15 +255,19 @@
     .error {
       color: #f87171;
       background: rgba(248, 113, 113, 0.1);
-    }
-
-    .hint {
+    }    .hint {
       background: rgba(59, 130, 246, 0.1);
       color: #60a5fa;
       padding: 10px;
       border-radius: 5px;
       margin: 10px 0;
       border-left: 4px solid #3b82f6;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .achievement {
@@ -280,9 +334,10 @@
         <div id="storyContent"></div>
         <div class="challenge-text" id="challengeText"></div>
         <div id="dataDisplay"></div>
-      </div>      <div class="code-panel">
+      </div>
+      <div class="code-panel">
         <h2>💻 Digital Analysis Tools</h2>
-        
+
         <div class="jupyter-cell">
           <div class="cell-header">
             <span class="cell-number">In [1]:</span>
@@ -293,7 +348,7 @@
         </div>
 
         <div id="output" class="output"></div>
-        
+
         <div class="button-group">
           <button onclick="runCode()">▶️ Run</button>
           <button onclick="getHint()">💡 Hint</button>
@@ -311,6 +366,7 @@
     let currentStage = 1;
     const totalStages = 9;
     let stages = [];
+    let shownHints = {}; // Track which hints have been shown for each stage
 
     // Initialize Skulpt for Python execution
     function outf(text) {
@@ -326,9 +382,9 @@
 
     // Game stages definition
     function initializeStages() {
-      stages = [
-        {
-          title: "The Mysterious Manuscript",          story: `Dr. Elena Rodriguez has discovered fragments of an ancient manuscript in the digital archives of the Alexandria Library. The fragments contain references to a lost civilization, but they're scattered and encoded. 
+      stages = [{
+        title: "The Mysterious Manuscript",
+        story: `Dr. Elena Rodriguez has discovered fragments of an ancient manuscript in the digital archives of the Alexandria Library. The fragments contain references to a lost civilization, but they're scattered and encoded. 
 
 You've been called in as a digital archaeologist to help piece together this mystery using computational analysis.
 
@@ -340,27 +396,32 @@ In Python, we store information in <em>variables</em>. Think of variables as lab
 • Use <code>print()</code> to display information
 
 Practice using variables and print statements with the manuscript data provided below.`,
-          challenge: "Your task: Store the manuscript's catalog number and initial fragment count as variables, then display them using print statements.",
-          data: `Manuscript ID: "MS-ALEX-2847"
-Fragment Count: 23`,          starterCode: `# Store the manuscript data as variables and display them
-# Manuscript ID: "MS-ALEX-2847"
-# Fragment Count: 23
+        challenge: "Your task: Complete the code to store the fragment count as a variable, then display both pieces of information using print statements.",
+        data: `Manuscript ID: "MS-ALEX-2847"
+Fragment Count: 23`,
+        starterCode: `# Store the manuscript data as variables and display them
+# We've started with the catalog number - you complete the fragment count
 
-# Your code here:
+catalog_number = "MS-ALEX-2847"
+# Create a variable called fragment_count and set it to 23
+
+# Print both variables using print statements
+print("Manuscript Catalog:" + catalog_number)
+# Add your print statement for fragment_count here
 `,
-          solution: `catalog_number = "MS-ALEX-2847"
+        solution: `catalog_number = "MS-ALEX-2847"
 fragment_count = 23
 print("Manuscript Catalog:", catalog_number)
 print("Fragments Found:", fragment_count)`,
-          hints: [
-            "Variables store data. Use = to assign values to variable names.",
-            "String variables need quotes: my_text = \"Hello\"",
-            "Number variables don't need quotes: my_number = 42",
-            "Use print() to display variable contents."
-          ]
-        },
-        {
-          title: "Analyzing Fragment Lengths",          story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
+        hints: [
+          "Variables store data. Use = to assign values to variable names.",
+          "String variables need quotes: my_text = \"Hello\"",
+          "Number variables don't need quotes: my_number = 42",
+          "Use print() to display variable contents."
+        ]
+      }, {
+        title: "Analyzing Fragment Lengths",
+        story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
 
 <strong>🔍 Python Concepts: Lists and For Loops</strong>
 
@@ -370,28 +431,28 @@ print("Fragments Found:", fragment_count)`,
 • <code>len()</code> returns how many items are in a list
 
 Practice using lists and loops to analyze the fragment length data below.`,
-          challenge: "Create a list of fragment lengths and calculate the total number of characters across all fragments.",
-          data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]`,
-          starterCode: `# Create a list of fragment lengths and calculate totals
+        challenge: "Create a list of fragment lengths and calculate the total number of characters across all fragments.",
+        data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]`,
+        starterCode: `# Create a list of fragment lengths and calculate totals
 # Fragment lengths: [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
 
 # Your code here:
 `,
-          solution: `fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+        solution: `fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
 total_characters = 0
 for length in fragment_lengths:
     total_characters = total_characters + length
 print("Total characters:", total_characters)
 print("Number of fragments:", len(fragment_lengths))`,
-          hints: [
-            "Lists store multiple values: my_list = [1, 2, 3]",
-            "For loops iterate through each item: for item in my_list:",
-            "len() function returns the length of a list",
-            "Use += as shorthand for adding: total += value"
-          ]
-        },
-        {
-          title: "Decoding Fragment Languages",          story: `Dr. Rodriguez has identified that the fragments contain text in multiple ancient languages. Some fragments are in Latin, others in ancient Greek, and some in an unknown script. We need to categorize them to focus our translation efforts.
+        hints: [
+          "Lists store multiple values: my_list = [1, 2, 3]",
+          "For loops iterate through each item: for item in my_list:",
+          "len() function returns the length of a list",
+          "Use += as shorthand for adding: total += value"
+        ]
+      }, {
+        title: "Decoding Fragment Languages",
+        story: `Dr. Rodriguez has identified that the fragments contain text in multiple ancient languages. Some fragments are in Latin, others in ancient Greek, and some in an unknown script. We need to categorize them to focus our translation efforts.
 
 <strong>🔍 Python Concepts: Conditional Statements (if/elif)</strong>
 
@@ -402,15 +463,15 @@ print("Number of fragments:", len(fragment_lengths))`,
 • Remember to indent code inside if/elif blocks!
 
 Practice using conditional statements to categorize the language codes below.`,
-          challenge: "Analyze the language codes and count how many fragments we have for each language type.",
-          data: `Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]`,
-          starterCode: `# Count language types using conditional statements
+        challenge: "Analyze the language codes and count how many fragments we have for each language type.",
+        data: `Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]`,
+        starterCode: `# Count language types using conditional statements
 # Language codes: ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
 # LAT = Latin, GRK = Greek, UNK = Unknown
 
 # Your code here:
 `,
-          solution: `languages = ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
+        solution: `languages = ["LAT", "GRK", "UNK", "LAT", "UNK", "LAT", "GRK", "LAT", "UNK", "GRK", "LAT", "UNK"]
 latin_count = 0
 greek_count = 0
 unknown_count = 0
@@ -424,15 +485,15 @@ for lang in languages:
 print("Latin fragments:", latin_count)
 print("Greek fragments:", greek_count)
 print("Unknown fragments:", unknown_count)`,
-          hints: [
-            "if statements check conditions: if variable == \"value\":",
-            "elif handles additional conditions: elif variable == \"other\":",
-            "Use == to compare values (not = which assigns)",
-            "Remember to indent code inside if/elif blocks"
-          ]
-        },
-        {
-          title: "Dating Analysis",          story: `Carbon dating results have arrived! Each fragment has been assigned an estimated date range. By analyzing these dates, we might discover if all fragments belong to the same time period or if they span multiple eras.
+        hints: [
+          "if statements check conditions: if variable == \"value\":",
+          "elif handles additional conditions: elif variable == \"other\":",
+          "Use == to compare values (not = which assigns)",
+          "Remember to indent code inside if/elif blocks"
+        ]
+      }, {
+        title: "Dating Analysis",
+        story: `Carbon dating results have arrived! Each fragment has been assigned an estimated date range. By analyzing these dates, we might discover if all fragments belong to the same time period or if they span multiple eras.
 
 <strong>🔍 Python Concepts: Finding Min/Max and Range Checking</strong>
 
@@ -443,14 +504,14 @@ Finding the smallest and largest values in data:
 • Update tracking variables inside loops
 
 Practice finding minimum and maximum values in the dating data below.`,
-          challenge: "Find the oldest and most recent fragments, and identify how many are from each century.",
-          data: `Estimated dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]`,
-          starterCode: `# Analyze fragment dates to find oldest, newest, and century distribution
+        challenge: "Find the oldest and most recent fragments, and identify how many are from each century.",
+        data: `Estimated dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]`,
+        starterCode: `# Analyze fragment dates to find oldest, newest, and century distribution
 # Dates (CE): [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
 
 # Your code here:
 `,
-          solution: `dates = [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
+        solution: `dates = [150, 230, 180, 340, 290, 160, 380, 200, 220, 310]
 oldest_date = dates[0]
 newest_date = dates[0]
 for date in dates:
@@ -473,14 +534,15 @@ for date in dates:
 print("2nd century fragments:", second_century)
 print("3rd century fragments:", third_century)
 print("4th century fragments:", fourth_century)`,
-          hints: [
-            "Access list items by index: my_list[0] gets the first item",
-            "Use < and > to compare numbers: if number < 100:",
-            "Combine conditions with 'and': if x >= 100 and x < 200:",
-            "Update variables inside loops to track minimum/maximum values"
-          ]
-        }, {
-          title: "Word Frequency Analysis",          story: `Dr. Rodriguez has translated several key fragments and noticed repeated words that might be significant. These recurring terms could be names, places, or important concepts that unlock the manuscript's meaning.
+        hints: [
+          "Access list items by index: my_list[0] gets the first item",
+          "Use < and > to compare numbers: if number < 100:",
+          "Combine conditions with 'and': if x >= 100 and x < 200:",
+          "Update variables inside loops to track minimum/maximum values"
+        ]
+      }, {
+        title: "Word Frequency Analysis",
+        story: `Dr. Rodriguez has translated several key fragments and noticed repeated words that might be significant. These recurring terms could be names, places, or important concepts that unlock the manuscript's meaning.
 
 <strong>🔍 Python Concepts: String Comparison and Finding Maximum Values</strong>
 
@@ -491,14 +553,14 @@ When analyzing text data, we often need to:
 • Convert numbers to strings for display: <code>str(count)</code>
 
 Practice counting word frequencies and finding the most common word in the translated fragments below.`,
-          challenge: "Count the frequency of important words across the translated fragments to identify the most significant terms.",
-          data: `Key words found: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]`, 
-          starterCode: `# Count word frequencies and find the most common word
+        challenge: "Count the frequency of important words across the translated fragments to identify the most significant terms.",
+        data: `Key words found: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]`,
+        starterCode: `# Count word frequencies and find the most common word
 # Words: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
 
 # Your code here:
 `,
-          solution: `words = ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
+        solution: `words = ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
 temple_count = 0
 gold_count = 0
 alexandria_count = 0
@@ -533,14 +595,15 @@ if alexandria_count > max_count:
     max_count = alexandria_count
     most_frequent = "alexandria"
 print("Most frequent word:", most_frequent, "(" + str(max_count) + " times)")`,
-          hints: [
-            "String comparison works like numbers: if word == \"temple\":",
-            "Track the maximum value by comparing with previous max",
-            "str() converts numbers to strings for concatenation",
-            "Use separate if statements (not elif) when you want to check all conditions"
-          ]
-        }, {
-          title: "The Final Revelation",          story: `Your analysis has revealed something extraordinary! The fragments aren't just random texts - they're coordinates, directions, and clues to a hidden chamber beneath the Library of Alexandria. The repeated word "temple" refers to a secret repository of scrolls that survived the library's destruction.
+        hints: [
+          "String comparison works like numbers: if word == \"temple\":",
+          "Track the maximum value by comparing with previous max",
+          "str() converts numbers to strings for concatenation",
+          "Use separate if statements (not elif) when you want to check all conditions"
+        ]
+      }, {
+        title: "The Final Revelation",
+        story: `Your analysis has revealed something extraordinary! The fragments aren't just random texts - they're coordinates, directions, and clues to a hidden chamber beneath the Library of Alexandria. The repeated word "temple" refers to a secret repository of scrolls that survived the library's destruction.
 
 <strong>🔍 Python Concepts: String Methods and List Operations</strong>
 
@@ -551,15 +614,15 @@ Advanced string and list techniques for data processing:
 • String concatenation with <code>+</code>: <code>"Hello " + "World"</code>
 
 Practice using string methods to decode the coordinate fragments below.`,
-          challenge: "Process the coordinate fragments to reveal the location of the hidden chamber.",
-          data: `Coordinate clues: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]`, 
-          starterCode: `# Process coordinate clues to find the hidden chamber location
+        challenge: "Process the coordinate fragments to reveal the location of the hidden chamber.",
+        data: `Coordinate clues: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]`,
+        starterCode: `# Process coordinate clues to find the hidden chamber location
 # Coordinates: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
 # N = North latitude, E = East longitude, depth = meters below surface
 
 # Your code here:
 `,
-          solution: `coordinates = ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
+        solution: `coordinates = ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
 latitude_coords = []
 longitude_coords = []
 depth_coords = []
@@ -592,14 +655,14 @@ print("Latitude:", unique_latitudes[0])
 print("Longitude:", unique_longitudes[0] + " to " + unique_longitudes[1])
 print("Depth: 15 meters below surface")
 print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
-          hints: [
-            "startswith() checks if a string begins with specific characters",
-            "append() adds items to a list: my_list.append(item)",
-            "'not in' checks if an item is NOT in a list", "Access list items by index: my_list[0], my_list[1], etc."
-          ]
-        },
-        {
-          title: "AI Assistant Integration",          story: `The archaeological team has gained access to an advanced AI assistant to help analyze the remaining fragments. Dr. Rodriguez wants to understand how to effectively communicate with AI systems to accelerate the research process.
+        hints: [
+          "startswith() checks if a string begins with specific characters",
+          "append() adds items to a list: my_list.append(item)",
+          "'not in' checks if an item is NOT in a list", "Access list items by index: my_list[0], my_list[1], etc."
+        ]
+      },
+      {
+        title: "AI Assistant Integration", story: `The archaeological team has gained access to an advanced AI assistant to help analyze the remaining fragments. Dr. Rodriguez wants to understand how to effectively communicate with AI systems to accelerate the research process.
 
 <strong>🤖 AI Concepts: Understanding AI Assistants</strong>
 
@@ -616,12 +679,12 @@ AI assistants work best when you provide:
 • Information about any constraints or requirements
 
 Practice AI-assisted thinking by clearly describing your analysis goals before coding.`,
-          challenge: "Use AI-assisted thinking to analyze metadata about the manuscript fragments. Practice describing what you want in clear language before writing code.",
-          data: `Fragment metadata: 
+        challenge: "Use AI-assisted thinking to analyze metadata about the manuscript fragments. Practice describing what you want in clear language before writing code.",
+        data: `Fragment metadata: 
 Fragment IDs: ["F001", "F002", "F003", "F004", "F005"]
 Condition scores (1-10): [8, 3, 9, 6, 7]
 Translation difficulty (1-5): [2, 5, 1, 4, 3]`,
-          starterCode: `# Practice AI-assisted development:
+        starterCode: `# Practice AI-assisted development:
 # Step 1: Describe your goal clearly in comments
 # Example: "I want to find which fragment has the best condition and which is easiest to translate"
 
@@ -632,7 +695,7 @@ difficulty_scores = [2, 5, 1, 4, 3]  # Lower = easier to translate
 
 # Your analysis code here:
 `,
-          solution: `fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
+        solution: `fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
 condition_scores = [8, 3, 9, 6, 7]
 difficulty_scores = [2, 5, 1, 4, 3]
 
@@ -657,15 +720,15 @@ print("Difficulty score:", difficulty_scores[easiest_translation_index])
 print("\\nUsing AI-suggested built-ins:")
 print("Best condition:", fragment_ids[condition_scores.index(max(condition_scores))])
 print("Easiest translation:", fragment_ids[difficulty_scores.index(min(difficulty_scores))])`,
-          hints: [
-            "When working with AI: Describe your goal before coding",
-            "Think about what 'best condition' means (highest number?)",
-            "Think about what 'easiest translation' means (lowest difficulty?)",
-            "AI assistants can suggest built-in functions like max(), min(), index()"
-          ]
-        },
-        {
-          title: "Effective Prompt Engineering",          story: `Dr. Rodriguez needs to extract specific information from a large database of ancient texts. She's learning that the way you ask questions to an AI system greatly affects the quality of the response.
+        hints: [
+          "When working with AI: Describe your goal before coding",
+          "Think about what 'best condition' means (highest number?)",
+          "Think about what 'easiest translation' means (lowest difficulty?)",
+          "AI assistants can suggest built-in functions like max(), min(), index()"
+        ]
+      },
+      {
+        title: "Effective Prompt Engineering", story: `Dr. Rodriguez needs to extract specific information from a large database of ancient texts. She's learning that the way you ask questions to an AI system greatly affects the quality of the response.
 
 <strong>🎯 Prompt Engineering Principles:</strong>
 
@@ -686,12 +749,12 @@ print("Easiest translation:", fragment_ids[difficulty_scores.index(min(difficult
 ✅ "Optimize for readability, avoid complex functions, explain each step"
 
 Practice writing clear, specific prompts for analyzing the research team data below.`,
-          challenge: "Practice prompt engineering by describing exactly what analysis you want to perform on the manuscript data, then implement it.",
-          data: `Research teams and their specialties:
+        challenge: "Practice prompt engineering by describing exactly what analysis you want to perform on the manuscript data, then implement it.",
+        data: `Research teams and their specialties:
 Teams: ["Linguistics", "Dating", "Preservation", "Digital"]
 Fragment assignments: [3, 2, 1, 4]
 Completion rates: [0.8, 1.0, 0.5, 0.9]`,
-          starterCode: `# PROMPT ENGINEERING PRACTICE:
+        starterCode: `# PROMPT ENGINEERING PRACTICE:
 # Write a clear, specific prompt describing what you want to analyze:
 # 
 # Your detailed prompt (write it as a comment):
@@ -704,7 +767,7 @@ completion_rates = [0.8, 1.0, 0.5, 0.9]  # 0.0 = 0%, 1.0 = 100%
 
 # Your implementation here:
 `,
-          solution: `# PROMPT ENGINEERING PRACTICE:
+        solution: `# PROMPT ENGINEERING PRACTICE:
 # Good prompt: "Analyze research team performance by finding the team
 # with highest completion rate, calculating total fragments processed,
 # and displaying a performance report for each team showing name,
@@ -741,16 +804,16 @@ total_assigned = sum(assignments)
 total_completed = sum(assignments[i] * completion_rates[i] for i in range(len(teams)))
 overall_progress = total_completed / total_assigned * 100
 print(f"\\n📊 Overall Project Progress: {overall_progress:.1f}%")`,
-          hints: [
-            "Good prompts include: what data you have, what you want to find, how to display results",
-            "Be specific about calculations: 'highest rate', 'total completed', etc.",
-            "Think about what would be useful to display: percentages, rankings, summaries",
-            "Consider edge cases and formatting in your prompt"
-          ]
-        },
-        {
-          title: "AI-Powered Code Review and Optimization",
-          story: `The archaeological team has developed several analysis scripts, but they want to improve code quality and efficiency. Dr. Rodriguez is learning how to use AI assistants for code review, optimization, and best practices.
+        hints: [
+          "Good prompts include: what data you have, what you want to find, how to display results",
+          "Be specific about calculations: 'highest rate', 'total completed', etc.",
+          "Think about what would be useful to display: percentages, rankings, summaries",
+          "Consider edge cases and formatting in your prompt"
+        ]
+      },
+      {
+        title: "AI-Powered Code Review and Optimization",
+        story: `The archaeological team has developed several analysis scripts, but they want to improve code quality and efficiency. Dr. Rodriguez is learning how to use AI assistants for code review, optimization, and best practices.
 
 <strong>🔍 AI Code Review Process:</strong>
 
@@ -789,12 +852,12 @@ print("Urgent manuscripts:", urgent_manuscripts)
 </div>
 
 Practice reviewing and optimizing code with AI assistance.`,
-          challenge: "Review the inefficient code below and use AI thinking to identify improvements. Rewrite it using better practices.",
-          data: `Fragment Processing Status:
+        challenge: "Review the inefficient code below and use AI thinking to identify improvements. Rewrite it using better practices.",
+        data: `Fragment Processing Status:
 Fragment IDs: ["F101", "F102", "F103", "F104", "F105", "F106"]
 Processing times (hours): [2.5, 1.2, 4.8, 3.1, 0.9, 2.3]
 Status: ["complete", "in-progress", "complete", "complete", "in-progress", "complete"]`,
-          starterCode: `# INEFFICIENT CODE TO REVIEW:
+        starterCode: `# INEFFICIENT CODE TO REVIEW:
 # This code works but has several issues - identify and fix them
 
 fragment_ids = ["F101", "F102", "F103", "F104", "F105", "F106"]
@@ -828,7 +891,7 @@ for i in range(len(fragment_ids)):
         longest_time = processing_times[i]
         longest_fragment = fragment_ids[i]
 print("Longest processing time:", longest_fragment, "took", longest_time, "hours")`,
-          solution: `# OPTIMIZED CODE WITH AI IMPROVEMENTS:
+        solution: `# OPTIMIZED CODE WITH AI IMPROVEMENTS:
 # Key improvements: list comprehensions, built-in functions, better variable names
 
 fragment_ids = ["F101", "F102", "F103", "F104", "F105", "F106"]
@@ -870,21 +933,27 @@ fragments_data = [
 completed = [f for f in fragments_data if f["status"] == "complete"]
 avg_time = sum(f["time"] for f in completed) / len(completed)
 print(f"Dictionary approach - Average time: {avg_time:.2f} hours")`,
-          hints: [
-            "Look for: while loops that could be for loops, manual calculations that could use built-ins",
-            "Consider: list comprehensions, zip(), max(), min(), sum() functions",
-            "Think about: variable names, code readability, duplicated logic",
-            "AI tip: Ask 'How can I make this more Pythonic?' for style improvements"
-          ]
-        }
+        hints: [
+          "Look for: while loops that could be for loops, manual calculations that could use built-ins",
+          "Consider: list comprehensions, zip(), max(), min(), sum() functions",
+          "Think about: variable names, code readability, duplicated logic",
+          "AI tip: Ask 'How can I make this more Pythonic?' for style improvements"
+        ]
+      }
       ];
     } function loadStage(stageNum) {
       const stage = stages[stageNum - 1];
 
       document.getElementById("currentStage").textContent = stageNum;
+
+      // Convert line breaks to proper HTML formatting
+      const formattedStory = stage.story
+        .replace(/\n\n/g, '</p><p>')  // Double line breaks become paragraph breaks
+        .replace(/\n/g, '<br>');      // Single line breaks become <br> tags
+
       document.getElementById("storyContent").innerHTML = `
                 <h3>${stage.title}</h3>
-                <p>${stage.story}</p>
+                <div class="story-text"><p>${formattedStory}</p></div>
             `;
 
       document.getElementById("challengeText").innerHTML = `
@@ -898,11 +967,12 @@ print(f"Dictionary approach - Average time: {avg_time:.2f} hours")`,
 ${stage.data.replace(/\n/g, '<br>')}
 </div>
                 `;
-      }
-
-      document.getElementById("codeEditor").value = stage.starterCode;
+      }      document.getElementById("codeEditor").value = stage.starterCode;
       document.getElementById("output").textContent = "";
       document.getElementById("hintArea").innerHTML = "";
+      
+      // Clear hint tracking for new stage
+      shownHints[stageNum] = [];
 
       // Remove next stage button if present
       const existingNextBtn = document.getElementById('nextStageBtn');
@@ -1042,23 +1112,58 @@ ${stage.data.replace(/\n/g, '<br>')}
         9: ["completed_fragments", "average_time", "longest_fragment", "optimization"]
       };
       return requirements[stageNum] || [];
-    }
-
-    function getHint() {
+    }    function getHint() {
       const stage = stages[currentStage - 1];
       const hintArea = document.getElementById("hintArea");
 
       if (stage.hints && stage.hints.length > 0) {
-        const randomHint = stage.hints[Math.floor(Math.random() * stage.hints.length)];
-        hintArea.innerHTML = `<div class="hint">💡 <strong>Archaeological Insight:</strong> ${randomHint}</div>`;
-      }
-    }
+        // Initialize hint tracking for current stage if not exists
+        if (!shownHints[currentStage]) {
+          shownHints[currentStage] = [];
+        }
 
-    function resetCode() {
+        // Find the next hint to show (first one not yet shown)
+        let nextHintIndex = -1;
+        for (let i = 0; i < stage.hints.length; i++) {
+          if (!shownHints[currentStage].includes(i)) {
+            nextHintIndex = i;
+            break;
+          }
+        }        // If we have a new hint to show
+        if (nextHintIndex !== -1) {
+          // Mark this hint as shown
+          shownHints[currentStage].push(nextHintIndex);
+          
+          // Create new hint element
+          const hintDiv = document.createElement('div');
+          hintDiv.className = 'hint';
+          hintDiv.innerHTML = `💡 <strong>Archaeological Insight #${shownHints[currentStage].length}:</strong> ${stage.hints[nextHintIndex]}`;
+          
+          // Add to existing hints instead of replacing
+          hintArea.appendChild(hintDiv);
+          
+          // Scroll to the new hint
+          hintDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          // All hints have been shown - only show this message once
+          const existingNote = hintArea.querySelector('.hint-complete-note');
+          if (!existingNote) {
+            const hintDiv = document.createElement('div');
+            hintDiv.className = 'hint hint-complete-note';
+            hintDiv.style.background = 'rgba(255, 165, 0, 0.1)';
+            hintDiv.style.borderLeftColor = '#ffa500';
+            hintDiv.innerHTML = `🔍 <strong>Archaeological Note:</strong> You've reviewed all available insights for this stage. Try applying what you've learned!`;
+            hintArea.appendChild(hintDiv);
+          }
+        }
+      }
+    }    function resetCode() {
       const stage = stages[currentStage - 1];
       document.getElementById("codeEditor").value = stage.starterCode;
       document.getElementById("output").textContent = "";
       document.getElementById("hintArea").innerHTML = "";
+      // Reset hint tracking for current stage
+      shownHints[currentStage] = [];
     }
 
     function showAchievement(title) {
