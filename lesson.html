@@ -480,8 +480,7 @@ print("4th century fragments:", fourth_century)`,
             "Update variables inside loops to track minimum/maximum values"
           ]
         }, {
-          title: "Word Frequency Analysis",
-          story: `Dr. Rodriguez has translated several key fragments and noticed repeated words that might be significant. These recurring terms could be names, places, or important concepts that unlock the manuscript's meaning.
+          title: "Word Frequency Analysis",          story: `Dr. Rodriguez has translated several key fragments and noticed repeated words that might be significant. These recurring terms could be names, places, or important concepts that unlock the manuscript's meaning.
 
 <strong>🔍 Python Concepts: String Comparison and Finding Maximum Values</strong>
 
@@ -491,35 +490,14 @@ When analyzing text data, we often need to:
 • Find the maximum value by comparing numbers
 • Convert numbers to strings for display: <code>str(count)</code>
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-fruits = ["apple", "banana", "apple", "orange", "banana", "apple"]
-apple_count = 0
-banana_count = 0
-for fruit in fruits:
-    if fruit == "apple":
-        apple_count = apple_count + 1
-    elif fruit == "banana":
-        banana_count = banana_count + 1
-print("Apples:", apple_count)
-print("Bananas:", banana_count)
-if apple_count > banana_count:
-    print("More apples than bananas!")
-</div>
-
-Run this to understand string comparison and counting, then adapt it for the manuscript words.`,
+Practice counting word frequencies and finding the most common word in the translated fragments below.`,
           challenge: "Count the frequency of important words across the translated fragments to identify the most significant terms.",
-          data: `Key words found: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]`, starterCode: `# Try the example first, then adapt for manuscript words
-fruits = ["apple", "banana", "apple", "orange", "banana", "apple"]
-apple_count = 0
-banana_count = 0
-for fruit in fruits:
-    if fruit == "apple":
-        apple_count = apple_count + 1
-    elif fruit == "banana":
-        banana_count = banana_count + 1
-print("Apples:", apple_count)
-print("Bananas:", banana_count)`,
+          data: `Key words found: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]`, 
+          starterCode: `# Count word frequencies and find the most common word
+# Words: ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
+
+# Your code here:
+`,
           solution: `words = ["temple", "gold", "alexandria", "temple", "scroll", "gold", "temple", "alexandria", "wisdom", "gold", "scroll", "temple"]
 temple_count = 0
 gold_count = 0
