@@ -540,8 +540,7 @@ print("Most frequent word:", most_frequent, "(" + str(max_count) + " times)")`,
             "Use separate if statements (not elif) when you want to check all conditions"
           ]
         }, {
-          title: "The Final Revelation",
-          story: `Your analysis has revealed something extraordinary! The fragments aren't just random texts - they're coordinates, directions, and clues to a hidden chamber beneath the Library of Alexandria. The repeated word "temple" refers to a secret repository of scrolls that survived the library's destruction.
+          title: "The Final Revelation",          story: `Your analysis has revealed something extraordinary! The fragments aren't just random texts - they're coordinates, directions, and clues to a hidden chamber beneath the Library of Alexandria. The repeated word "temple" refers to a secret repository of scrolls that survived the library's destruction.
 
 <strong>🔍 Python Concepts: String Methods and List Operations</strong>
 
@@ -551,34 +550,15 @@ Advanced string and list techniques for data processing:
 • <code>not in</code> checks if something is NOT in a list: <code>if item not in my_list:</code>
 • String concatenation with <code>+</code>: <code>"Hello " + "World"</code>
 
-<strong>Try this example first:</strong>
-<div class="data-sample">
-codes = ["USER123", "ADMIN456", "USER789", "GUEST111"]
-user_codes = []
-admin_codes = []
-for code in codes:
-    if code.startswith("USER"):
-        user_codes.append(code)
-    elif code.startswith("ADMIN"):
-        admin_codes.append(code)
-print("User codes:", user_codes)
-print("Admin codes:", admin_codes)
-print("Total codes processed:", len(codes))
-</div>
-
-Run this to understand string methods and list operations, then apply it to decode the coordinates.`,
+Practice using string methods to decode the coordinate fragments below.`,
           challenge: "Process the coordinate fragments to reveal the location of the hidden chamber.",
-          data: `Coordinate clues: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]`, starterCode: `# Try the example first, then adapt for coordinates
-codes = ["USER123", "ADMIN456", "USER789", "GUEST111"]
-user_codes = []
-admin_codes = []
-for code in codes:
-    if code.startswith("USER"):
-        user_codes.append(code)
-    elif code.startswith("ADMIN"):
-        admin_codes.append(code)
-print("User codes:", user_codes)
-print("Admin codes:", admin_codes)`,
+          data: `Coordinate clues: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]`, 
+          starterCode: `# Process coordinate clues to find the hidden chamber location
+# Coordinates: ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
+# N = North latitude, E = East longitude, depth = meters below surface
+
+# Your code here:
+`,
           solution: `coordinates = ["N31", "E29", "N31", "E30", "N31", "E29", "depth-15", "N31", "E30", "depth-15"]
 latitude_coords = []
 longitude_coords = []
