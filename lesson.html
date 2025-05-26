@@ -665,8 +665,7 @@ print("Easiest translation:", fragment_ids[difficulty_scores.index(min(difficult
           ]
         },
         {
-          title: "Effective Prompt Engineering",
-          story: `Dr. Rodriguez needs to extract specific information from a large database of ancient texts. She's learning that the way you ask questions to an AI system greatly affects the quality of the response.
+          title: "Effective Prompt Engineering",          story: `Dr. Rodriguez needs to extract specific information from a large database of ancient texts. She's learning that the way you ask questions to an AI system greatly affects the quality of the response.
 
 <strong>🎯 Prompt Engineering Principles:</strong>
 
@@ -686,44 +685,25 @@ print("Easiest translation:", fragment_ids[difficulty_scores.index(min(difficult
 ❌ "Make it better"
 ✅ "Optimize for readability, avoid complex functions, explain each step"
 
-<strong>Try this example:</strong>
-<div class="data-sample">
-# Good prompt: "Create code to process archaeological data where
-# I have fragment IDs and need to pair them with analysis results,
-# then display in a readable format showing fragment ID and status"
-
-fragments = ["F001", "F002", "F003"]
-analysis_complete = [True, False, True]
-
-for i in range(len(fragments)):
-    status = "Complete" if analysis_complete[i] else "Pending"
-    print(f"Fragment {fragments[i]}: Analysis {status}")
-</div>
-
-Practice writing clear prompts for the task below.`,
+Practice writing clear, specific prompts for analyzing the research team data below.`,
           challenge: "Practice prompt engineering by describing exactly what analysis you want to perform on the manuscript data, then implement it.",
           data: `Research teams and their specialties:
 Teams: ["Linguistics", "Dating", "Preservation", "Digital"]
 Fragment assignments: [3, 2, 1, 4]
 Completion rates: [0.8, 1.0, 0.5, 0.9]`,
           starterCode: `# PROMPT ENGINEERING PRACTICE:
-# Write a clear prompt describing what you want to analyze:
+# Write a clear, specific prompt describing what you want to analyze:
 # 
-# Example good prompt:
-# "I need to analyze research team performance. I have team names,
-#  number of fragments assigned, and completion rates (0.0-1.0).
-#  I want to find which team has the highest completion rate
-#  and display all teams with their performance metrics."
-
-# Your prompt (write it as a comment):
+# Your detailed prompt (write it as a comment):
 # 
 
-# Now implement based on your prompt:
+# Data to work with:
 teams = ["Linguistics", "Dating", "Preservation", "Digital"]
 assignments = [3, 2, 1, 4]
-completion_rates = [0.8, 1.0, 0.5, 0.9]
+completion_rates = [0.8, 1.0, 0.5, 0.9]  # 0.0 = 0%, 1.0 = 100%
 
-# Your implementation here`,
+# Your implementation here:
+`,
           solution: `# PROMPT ENGINEERING PRACTICE:
 # Good prompt: "Analyze research team performance by finding the team
 # with highest completion rate, calculating total fragments processed,
