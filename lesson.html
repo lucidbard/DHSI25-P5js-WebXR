@@ -599,8 +599,7 @@ print("\\n🏛️ DISCOVERY: Secret chamber located beneath Alexandria!")`,
           ]
         },
         {
-          title: "AI Assistant Integration",
-          story: `The archaeological team has gained access to an advanced AI assistant to help analyze the remaining fragments. Dr. Rodriguez wants to understand how to effectively communicate with AI systems to accelerate the research process.
+          title: "AI Assistant Integration",          story: `The archaeological team has gained access to an advanced AI assistant to help analyze the remaining fragments. Dr. Rodriguez wants to understand how to effectively communicate with AI systems to accelerate the research process.
 
 <strong>🤖 AI Concepts: Understanding AI Assistants</strong>
 
@@ -616,36 +615,23 @@ AI assistants work best when you provide:
 • Examples of input and expected output
 • Information about any constraints or requirements
 
-<strong>Try this example interaction:</strong>
-<div class="data-sample">
-# Instead of writing from scratch, describe what you want:
-# "I need to find the average of a list of numbers"
-
-# AI-suggested solution:
-numbers = [45, 23, 67, 12, 89]
-total = sum(numbers)  # sum() is a built-in function
-average = total / len(numbers)
-print("Average fragment length:", average)
-</div>
-
-Run this to see AI-suggested code, then try asking an AI assistant to help with the analysis below.`,
+Practice AI-assisted thinking by clearly describing your analysis goals before coding.`,
           challenge: "Use AI-assisted thinking to analyze metadata about the manuscript fragments. Practice describing what you want in clear language before writing code.",
           data: `Fragment metadata: 
 Fragment IDs: ["F001", "F002", "F003", "F004", "F005"]
 Condition scores (1-10): [8, 3, 9, 6, 7]
 Translation difficulty (1-5): [2, 5, 1, 4, 3]`,
           starterCode: `# Practice AI-assisted development:
-# Step 1: Describe your goal clearly
-# "I want to find which fragment has the best condition 
-#  and which is easiest to translate"
+# Step 1: Describe your goal clearly in comments
+# Example: "I want to find which fragment has the best condition and which is easiest to translate"
 
-# Step 2: Use AI suggestions or build incrementally
+# Step 2: Think about the data
 fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
-condition_scores = [8, 3, 9, 6, 7]
-difficulty_scores = [2, 5, 1, 4, 3]
+condition_scores = [8, 3, 9, 6, 7]  # Higher = better condition
+difficulty_scores = [2, 5, 1, 4, 3]  # Lower = easier to translate
 
-# Your task: Find the best condition and easiest translation
-# Think about what "best" and "easiest" mean in terms of the numbers`,
+# Your analysis code here:
+`,
           solution: `fragment_ids = ["F001", "F002", "F003", "F004", "F005"]
 condition_scores = [8, 3, 9, 6, 7]
 difficulty_scores = [2, 5, 1, 4, 3]
