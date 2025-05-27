@@ -418,8 +418,7 @@ print("Fragments Found:", fragment_count)`,
           "String variables need quotes: my_text = \"Hello\"",
           "Number variables don't need quotes: my_number = 42",
           "Use print() to display variable contents."
-        ]
-      }, {
+        ]      }, {
         title: "Analyzing Fragment Lengths",
         story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
 
@@ -429,26 +428,81 @@ print("Fragments Found:", fragment_count)`,
 • Create lists with square brackets: <code>numbers = [1, 2, 3, 4]</code>
 • <em>For loops</em> let you process each item: <code>for item in my_list:</code>
 • <code>len()</code> returns how many items are in a list
+• Count items that meet conditions using loops and if statements
 
-Practice using lists and loops to analyze the fragment length data below.`,
-        challenge: "Create a list of fragment lengths and calculate the total number of characters across all fragments.",
-        data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]`,
-        starterCode: `# Create a list of fragment lengths and calculate totals
-# Fragment lengths: [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+Practice using lists, loops, and counting to analyze the fragment data below.`,
+        challenge: "Using the provided fragment lengths list, calculate statistics and count fragments by size categories to understand the distribution.",
+        data: `Fragment lengths (characters): [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
 
-# Your code here:
+Categories for analysis:
+• Short fragments: less than 30 characters
+• Medium fragments: 30-60 characters  
+• Long fragments: more than 60 characters`,
+        starterCode: `# Analyze fragment length distribution
+# The data has already been provided as a list
+fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+
+# Task 1: Use len() to count total fragments
+total_fragments = len(fragment_lengths)
+print("Total fragments found:", total_fragments)
+
+# Task 2: Calculate total characters using a for loop
+total_characters = 0
+# Write your for loop here to add up all the lengths
+
+print("Total characters:", total_characters)
+
+# Task 3: Count fragments by size category
+short_count = 0    # less than 30 characters
+medium_count = 0   # 30-60 characters  
+long_count = 0     # more than 60 characters
+
+# Write your for loop here to categorize and count each fragment
+# Hint: use if/elif statements inside the loop
+
+print("Fragment distribution:")
+print("Short fragments (< 30 chars):", short_count)
+print("Medium fragments (30-60 chars):", medium_count) 
+print("Long fragments (> 60 chars):", long_count)
 `,
         solution: `fragment_lengths = [45, 23, 67, 12, 89, 34, 56, 78, 21, 43]
+
+# Task 1: Use len() to count total fragments
+total_fragments = len(fragment_lengths)
+print("Total fragments found:", total_fragments)
+
+# Task 2: Calculate total characters using a for loop
 total_characters = 0
 for length in fragment_lengths:
     total_characters = total_characters + length
 print("Total characters:", total_characters)
-print("Number of fragments:", len(fragment_lengths))`,
+
+# Task 3: Count fragments by size category
+short_count = 0    # less than 30 characters
+medium_count = 0   # 30-60 characters  
+long_count = 0     # more than 60 characters
+
+for length in fragment_lengths:
+    if length < 30:
+        short_count = short_count + 1
+    elif length >= 30 and length <= 60:
+        medium_count = medium_count + 1
+    else:
+        long_count = long_count + 1
+
+print("Fragment distribution:")
+print("Short fragments (< 30 chars):", short_count)
+print("Medium fragments (30-60 chars):", medium_count) 
+print("Long fragments (> 60 chars):", long_count)
+
+# Bonus: Calculate average length
+average_length = total_characters / total_fragments
+print("Average fragment length:", round(average_length, 1), "characters")`,
         hints: [
-          "Lists store multiple values: my_list = [1, 2, 3]",
-          "For loops iterate through each item: for item in my_list:",
-          "len() function returns the length of a list",
-          "Use += as shorthand for adding: total += value"
+          "Use len(fragment_lengths) to count how many items are in the list",
+          "For loops iterate through each item: for length in fragment_lengths:",
+          "Inside the loop, add each length to your total: total_characters = total_characters + length",
+          "Use if/elif/else inside the loop to categorize: if length < 30:"
         ]
       }, {
         title: "Decoding Fragment Languages",
@@ -1105,10 +1159,9 @@ ${stage.data.replace(/\n/g, '<br>')}
         };
         buttonGroup.appendChild(completeButton);
       }
-    } function getRequiredElements(stageNum) {
-      const requirements = {
+    } function getRequiredElements(stageNum) {      const requirements = {
         1: ["catalog_number", "fragment_count", "print"],
-        2: ["fragment_lengths", "for", "total_characters", "len"],
+        2: ["fragment_lengths", "for", "total_characters", "len", "short_count", "medium_count", "long_count"],
         3: ["languages", "if", "elif", "latin_count", "greek_count"],
         4: ["dates", "oldest_date", "newest_date", "second_century"],
         5: ["words", "temple_count", "most_frequent"],
