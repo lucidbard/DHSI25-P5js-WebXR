@@ -255,7 +255,9 @@
     .error {
       color: #f87171;
       background: rgba(248, 113, 113, 0.1);
-    }    .hint {
+    }
+
+    .hint {
       background: rgba(59, 130, 246, 0.1);
       color: #60a5fa;
       padding: 10px;
@@ -266,8 +268,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .achievement {
@@ -418,7 +427,8 @@ print("Fragments Found:", fragment_count)`,
           "String variables need quotes: my_text = \"Hello\"",
           "Number variables don't need quotes: my_number = 42",
           "Use print() to display variable contents."
-        ]      }, {
+        ]
+      }, {
         title: "Analyzing Fragment Lengths",
         story: `The manuscript fragments vary greatly in length. Some are mere words, others are complete sentences. Understanding the distribution of fragment sizes might reveal patterns about how the original text was structured.
 
@@ -1021,10 +1031,10 @@ print(f"Dictionary approach - Average time: {avg_time:.2f} hours")`,
 ${stage.data.replace(/\n/g, '<br>')}
 </div>
                 `;
-      }      document.getElementById("codeEditor").value = stage.starterCode;
+      } document.getElementById("codeEditor").value = stage.starterCode;
       document.getElementById("output").textContent = "";
       document.getElementById("hintArea").innerHTML = "";
-      
+
       // Clear hint tracking for new stage
       shownHints[stageNum] = [];
 
@@ -1081,16 +1091,16 @@ ${stage.data.replace(/\n/g, '<br>')}
         output.className = "output error";
         output.textContent = generateErrorFeedback(err.toString());
       }
-    }    function generateErrorFeedback(error) {
+    } function generateErrorFeedback(error) {
       const stage = stages[currentStage - 1];
 
       // Check for unbalanced parentheses first (most specific)
-      if (error.includes("SyntaxError") && 
-          (error.includes("unexpected EOF") || 
-           error.includes("')'") || 
-           error.includes("unmatched") ||
-           error.includes("closing parenthesis") ||
-           error.includes("opening parenthesis"))) {
+      if (error.includes("SyntaxError") &&
+        (error.includes("unexpected EOF") ||
+          error.includes("')'") ||
+          error.includes("unmatched") ||
+          error.includes("closing parenthesis") ||
+          error.includes("opening parenthesis"))) {
         return `🔍 Digital Analysis Error: Unbalanced parentheses detected!\n\nYour code has mismatched parentheses ( ). Check for:\n• Every opening parenthesis ( has a matching closing parenthesis )\n• Parentheses are in the correct order\n• No extra or missing parentheses in function calls like print()\n\nTip: Count your parentheses - they should be balanced!\n\nOriginal error: ${error}`;
       } else if (error.includes("SyntaxError")) {
         return `🔍 Digital Analysis Error: Syntax issue detected!\n\nThe computer doesn't understand part of your code. Check for:\n• Missing quotes around text\n• Incorrect indentation\n• Missing colons after if/for statements\n• Unbalanced parentheses ( )\n\nOriginal error: ${error}`;
@@ -1101,7 +1111,7 @@ ${stage.data.replace(/\n/g, '<br>')}
       } else {
         return `🔍 Analysis Error: ${error}\n\nDon't worry! Debugging is part of the archaeological process. Check your code carefully and try again.`;
       }
-    }function checkSolution(code) {
+    } function checkSolution(code) {
       const stage = stages[currentStage - 1];
       const output = document.getElementById("output");
 
@@ -1159,7 +1169,8 @@ ${stage.data.replace(/\n/g, '<br>')}
         };
         buttonGroup.appendChild(completeButton);
       }
-    } function getRequiredElements(stageNum) {      const requirements = {
+    } function getRequiredElements(stageNum) {
+      const requirements = {
         1: ["catalog_number", "fragment_count", "print"],
         2: ["fragment_lengths", "for", "total_characters", "len", "short_count", "medium_count", "long_count"],
         3: ["languages", "if", "elif", "latin_count", "greek_count"],
@@ -1171,7 +1182,7 @@ ${stage.data.replace(/\n/g, '<br>')}
         9: ["completed_fragments", "average_time", "longest_fragment", "optimization"]
       };
       return requirements[stageNum] || [];
-    }    function getHint() {
+    } function getHint() {
       const stage = stages[currentStage - 1];
       const hintArea = document.getElementById("hintArea");
 
@@ -1192,15 +1203,15 @@ ${stage.data.replace(/\n/g, '<br>')}
         if (nextHintIndex !== -1) {
           // Mark this hint as shown
           shownHints[currentStage].push(nextHintIndex);
-          
+
           // Create new hint element
           const hintDiv = document.createElement('div');
           hintDiv.className = 'hint';
           hintDiv.innerHTML = `💡 <strong>Archaeological Insight #${shownHints[currentStage].length}:</strong> ${stage.hints[nextHintIndex]}`;
-          
+
           // Add to existing hints instead of replacing
           hintArea.appendChild(hintDiv);
-          
+
           // Scroll to the new hint
           hintDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
@@ -1216,7 +1227,7 @@ ${stage.data.replace(/\n/g, '<br>')}
           }
         }
       }
-    }    function resetCode() {
+    } function resetCode() {
       const stage = stages[currentStage - 1];
       document.getElementById("codeEditor").value = stage.starterCode;
       document.getElementById("output").textContent = "";
